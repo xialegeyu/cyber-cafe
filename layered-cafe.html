@@ -3,23 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>分层咖啡馆原型</title>
+    <title>暖阳分层咖啡馆原型</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
               dusk: '#15120f',
-              wall: '#7b514f',
-              floor: '#4b3a34',
               amber: '#e7a756',
               paper: '#f4ead8',
-              moss: '#536246',
-            },
-            fontFamily: {
-              sans: ['Nunito', 'ui-sans-serif', 'system-ui', 'sans-serif'],
             },
           },
         },
@@ -28,8 +21,8 @@
     <style>
       body {
         background:
-          radial-gradient(circle at 50% 18%, rgba(231, 167, 86, 0.18), transparent 26rem),
-          linear-gradient(180deg, #6e363e 0%, #2a1e1d 70%, #15120f 100%);
+          radial-gradient(circle at 50% 12%, rgba(231, 167, 86, 0.2), transparent 28rem),
+          linear-gradient(180deg, #2a201b 0%, #15120f 100%);
       }
 
       .glass {
@@ -39,21 +32,124 @@
         backdrop-filter: blur(18px);
       }
 
-      #layered-canvas canvas {
-        width: 100% !important;
-        height: 100% !important;
-        display: block;
+      .scene {
+        position: relative;
+        width: min(100%, 1120px);
+        aspect-ratio: 16 / 9;
+        margin: 0 auto;
+        overflow: hidden;
         border-radius: 8px;
+        background: #17130f;
+      }
+
+      .layer {
+        position: absolute;
+        pointer-events: none;
+        user-select: none;
+      }
+
+      .room-bg {
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .table-layer {
+        left: 35.5%;
+        top: 45.5%;
+        width: 31%;
+        transform: translate(-50%, -50%) rotate(-1deg);
+        filter: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.32));
+      }
+
+      .avatar-layer {
+        left: 32.4%;
+        top: 53.8%;
+        width: 14.5%;
+        transform: translate(-50%, -50%);
+        filter: drop-shadow(0 12px 11px rgba(0, 0, 0, 0.34));
+      }
+
+      .table-front-mask {
+        left: 37.2%;
+        top: 51.2%;
+        width: 23.5%;
+        height: 8.4%;
+        transform: translate(-50%, -50%) skewX(-28deg) rotate(1deg);
+        border-radius: 5px;
+        background:
+          linear-gradient(180deg, rgba(167, 105, 49, 0.96), rgba(87, 53, 30, 0.98)),
+          linear-gradient(90deg, transparent, rgba(255, 218, 137, 0.24), transparent);
+        box-shadow:
+          inset 0 3px 0 rgba(244, 200, 121, 0.22),
+          0 10px 16px rgba(0, 0, 0, 0.22);
+      }
+
+      .sunbeam {
+        left: 8%;
+        top: 4%;
+        width: 56%;
+        height: 92%;
+        transform: skewX(-18deg);
+        background: linear-gradient(90deg, transparent, rgba(255, 209, 122, 0.16), transparent);
+        mix-blend-mode: screen;
+      }
+
+      .dust {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      .dust i {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        border-radius: 999px;
+        background: rgba(255, 219, 151, 0.78);
+        animation: floatDust 8s linear infinite;
+      }
+
+      @keyframes floatDust {
+        from {
+          transform: translate3d(-8px, 12px, 0);
+          opacity: 0;
+        }
+        20% {
+          opacity: 0.75;
+        }
+        80% {
+          opacity: 0.55;
+        }
+        to {
+          transform: translate3d(34px, -26px, 0);
+          opacity: 0;
+        }
       }
     </style>
   </head>
   <body class="min-h-screen text-paper antialiased">
     <main class="mx-auto flex min-h-screen max-w-6xl flex-col gap-4 px-4 py-4">
-      <section class="glass relative h-[68vh] min-h-[520px] overflow-hidden rounded-lg p-2">
-        <div id="layered-canvas" class="h-full w-full"></div>
-        <div class="pointer-events-none absolute left-6 top-5">
-          <p class="text-xs uppercase tracking-[0.28em] text-amber/70">layered prototype</p>
-          <h1 class="mt-2 text-2xl font-semibold">单桌分层咖啡馆</h1>
+      <section class="glass rounded-lg p-2">
+        <div class="scene">
+          <img class="layer room-bg" src="assets/layered-room-bg-v1.png" alt="暖阳咖啡馆背景" />
+          <div class="layer sunbeam"></div>
+          <img class="layer table-layer" src="assets/layered-table-chair-v1.png" alt="咖啡馆桌椅" />
+          <img id="avatar" class="layer avatar-layer hidden" src="assets/layered-avatar-v1.png" alt="坐姿 Avatar" />
+          <div id="table-mask" class="layer table-front-mask hidden"></div>
+          <div class="dust" aria-hidden="true">
+            <i style="left: 22%; top: 36%; animation-delay: -0.2s"></i>
+            <i style="left: 34%; top: 28%; animation-delay: -1.4s"></i>
+            <i style="left: 43%; top: 52%; animation-delay: -2.2s"></i>
+            <i style="left: 56%; top: 42%; animation-delay: -3.8s"></i>
+            <i style="left: 66%; top: 30%; animation-delay: -5.1s"></i>
+            <i style="left: 78%; top: 48%; animation-delay: -6.4s"></i>
+          </div>
+          <div class="pointer-events-none absolute left-5 top-5">
+            <p class="text-xs uppercase tracking-[0.28em] text-amber/75">layered prototype</p>
+            <h1 class="mt-2 text-2xl font-semibold">暖阳分层咖啡馆</h1>
+          </div>
         </div>
       </section>
 
@@ -79,264 +175,29 @@
         >
           起身
         </button>
-        <p id="status" class="text-sm text-paper/60 md:col-span-3">这是一个只验证图层关系的版本：桌子前缘会真的挡住小人。</p>
+        <p id="status" class="text-sm text-paper/60 md:col-span-3">
+          新原型：背景、桌椅、Avatar、桌前缘遮挡、光效分层渲染。
+        </p>
       </section>
     </main>
 
     <script>
-      const state = {
-        seated: false,
-        name: '',
-      };
-
       const $ = (selector) => document.querySelector(selector);
 
-      function iso(cx, cy, x, y) {
-        return {
-          x: cx + (x - y) * 0.866,
-          y: cy + (x + y) * 0.5,
-        };
+      function updateStatus(seated) {
+        const name = $('#nickname').value.trim() || '无名自习者';
+        $('#avatar').classList.toggle('hidden', !seated);
+        $('#table-mask').classList.toggle('hidden', !seated);
+        $('#status').textContent = seated
+          ? `${name} 已坐下：桌前缘遮挡 Avatar，下半身进入桌下空间。`
+          : '新原型：背景、桌椅、Avatar、桌前缘遮挡、光效分层渲染。';
       }
 
-      function drawIsoRect(p, cx, cy, x, y, w, d, color) {
-        const a = iso(cx, cy, x, y);
-        const b = iso(cx, cy, x + w, y);
-        const c = iso(cx, cy, x + w, y + d);
-        const e = iso(cx, cy, x, y + d);
-        p.fill(color);
-        p.quad(a.x, a.y, b.x, b.y, c.x, c.y, e.x, e.y);
-      }
-
-      function drawIsoBox(p, cx, cy, x, y, w, d, h, top, left, right) {
-        const a = iso(cx, cy, x, y);
-        const b = iso(cx, cy, x + w, y);
-        const c = iso(cx, cy, x + w, y + d);
-        const e = iso(cx, cy, x, y + d);
-        const ah = { x: a.x, y: a.y - h };
-        const bh = { x: b.x, y: b.y - h };
-        const ch = { x: c.x, y: c.y - h };
-        const eh = { x: e.x, y: e.y - h };
-
-        p.noStroke();
-        p.fill(left);
-        p.quad(e.x, e.y, c.x, c.y, ch.x, ch.y, eh.x, eh.y);
-        p.fill(right);
-        p.quad(b.x, b.y, c.x, c.y, ch.x, ch.y, bh.x, bh.y);
-        p.fill(top);
-        p.quad(ah.x, ah.y, bh.x, bh.y, ch.x, ch.y, eh.x, eh.y);
-      }
-
-      function drawRoom(p, cx, cy) {
-        p.background('#6d3940');
-
-        drawIsoRect(p, cx, cy, -260, -155, 500, 360, '#4f4039');
-        for (let i = -250; i < 260; i += 32) {
-          const a = iso(cx, cy, i, -155);
-          const b = iso(cx, cy, i, 205);
-          p.stroke('rgba(244, 234, 216, 0.05)');
-          p.line(a.x, a.y, b.x, b.y);
-        }
-        for (let i = -155; i < 220; i += 32) {
-          const a = iso(cx, cy, -250, i);
-          const b = iso(cx, cy, 240, i);
-          p.stroke('rgba(244, 234, 216, 0.05)');
-          p.line(a.x, a.y, b.x, b.y);
-        }
-
-        p.noStroke();
-        p.fill('#855755');
-        p.quad(cx - 355, cy - 182, cx - 55, cy - 338, cx - 55, cy - 168, cx - 355, cy - 12);
-        p.fill('#6d4747');
-        p.quad(cx - 55, cy - 338, cx + 288, cy - 154, cx + 288, cy + 12, cx - 55, cy - 168);
-
-        p.fill('#f0b96e');
-        p.quad(cx + 112, cy - 166, cx + 208, cy - 112, cx + 208, cy - 40, cx + 112, cy - 94);
-        p.fill('rgba(255, 214, 132, 0.38)');
-        p.quad(cx + 112, cy - 94, cx + 208, cy - 40, cx + 88, cy + 130, cx + 12, cy + 72);
-
-        drawBookshelf(p, cx - 214, cy - 166);
-        drawPlant(p, cx + 140, cy + 6, 0.78);
-      }
-
-      function drawBookshelf(p, x, y) {
-        p.noStroke();
-        p.fill('#6a4630');
-        p.rect(x, y, 82, 126, 4);
-        p.fill('#8f653b');
-        p.rect(x + 8, y + 15, 66, 10);
-        p.rect(x + 8, y + 54, 66, 10);
-        p.rect(x + 8, y + 92, 66, 10);
-        ['#c77854', '#d9a452', '#6f825f', '#cfc1a1'].forEach((color, index) => {
-          p.fill(color);
-          p.rect(x + 14 + index * 14, y + 27, 9, 25, 2);
-          p.rect(x + 18 + index * 12, y + 66, 8, 24, 2);
-        });
-      }
-
-      function drawPlant(p, x, y, s) {
-        p.push();
-        p.translate(x, y);
-        p.scale(s);
-        p.noStroke();
-        p.fill('#4f392b');
-        p.rect(-11, 24, 22, 24, 4);
-        p.fill('#536246');
-        for (let i = 0; i < 9; i++) {
-          const angle = i * 0.72;
-          p.ellipse(Math.cos(angle) * 24, Math.sin(angle) * 13, 18, 44);
-        }
-        p.pop();
-      }
-
-      function drawBackChair(p, cx, cy) {
-        const pos = iso(cx, cy, -56, 48);
-        p.push();
-        p.translate(pos.x, pos.y);
-        p.noStroke();
-        p.fill('#6f472f');
-        p.rect(-32, -88, 64, 64, 12);
-        p.fill('#8c6240');
-        p.rect(-38, -35, 76, 40, 10);
-        p.fill('#3e2b22');
-        p.rect(-34, 2, 9, 52, 4);
-        p.rect(25, 2, 9, 52, 4);
-        p.pop();
-      }
-
-      function drawSeatedAvatar(p, cx, cy) {
-        const pos = iso(cx, cy, -58, 42);
-        p.push();
-        p.translate(pos.x, pos.y);
-        p.noStroke();
-        p.scale(0.86);
-
-        p.fill('rgba(0, 0, 0, 0.18)');
-        p.ellipse(0, 58, 96, 28);
-
-        p.fill('#5b3728');
-        p.ellipse(0, -48, 54, 54);
-        p.fill('#f0c39f');
-        p.ellipse(2, -34, 30, 34);
-        p.fill('#873f35');
-        p.quad(-38, -22, 26, -34, 42, 36, -30, 48);
-        p.fill('#54352a');
-        p.quad(-62, 24, -18, 32, -8, 76, -68, 62);
-        p.fill('#304438');
-        p.quad(12, 32, 56, 24, 66, 70, 16, 78);
-        p.fill('#f0c39f');
-        p.ellipse(-38, 0, 15, 13);
-        p.ellipse(36, -6, 14, 12);
-        p.fill('#f5c975');
-        p.ellipse(45, -12, 18, 20);
-        p.fill('#38251f');
-        p.ellipse(45, -14, 11, 7);
-        p.pop();
-      }
-
-      function drawTableBack(p, cx, cy) {
-        drawIsoBox(p, cx, cy, -70, -44, 138, 86, 18, '#8a6138', '#654329', '#5a3925');
-      }
-
-      function drawTableFrontOccluder(p, cx, cy) {
-        const a = iso(cx, cy, -70, 42);
-        const b = iso(cx, cy, 68, 42);
-        const c = iso(cx, cy, 68, 60);
-        const d = iso(cx, cy, -70, 60);
-        p.noStroke();
-        p.fill('#704a2b');
-        p.quad(a.x, a.y - 18, b.x, b.y - 18, c.x, c.y - 5, d.x, d.y - 5);
-        p.fill('rgba(245, 191, 106, 0.25)');
-        p.quad(a.x + 4, a.y - 22, b.x - 4, b.y - 22, b.x - 10, b.y - 14, a.x + 10, a.y - 14);
-
-        const cup = iso(cx, cy, 20, 4);
-        p.fill('#e4d0aa');
-        p.ellipse(cup.x, cup.y - 24, 22, 14);
-        p.fill('#3b2a22');
-        p.ellipse(cup.x, cup.y - 26, 14, 8);
-      }
-
-      function drawFrontChair(p, cx, cy) {
-        const pos = iso(cx, cy, -82, 86);
-        p.push();
-        p.translate(pos.x, pos.y);
-        p.noStroke();
-        p.fill('#7b5134');
-        p.rect(-36, -28, 72, 28, 8);
-        p.fill('#3c2921');
-        p.rect(-34, -2, 8, 54, 4);
-        p.rect(26, -2, 8, 54, 4);
-        p.pop();
-      }
-
-      function drawLamp(p, x, y) {
-        p.noStroke();
-        p.fill('rgba(255, 191, 91, 0.2)');
-        p.ellipse(x, y + 18, 120, 92);
-        p.fill('#df8b4e');
-        p.triangle(x - 24, y, x + 24, y, x, y - 42);
-        p.fill('#f6c36c');
-        p.ellipse(x, y + 2, 50, 14);
-      }
-
-      function sketch(p) {
-        p.setup = () => {
-          const host = $('#layered-canvas');
-          p.createCanvas(host.clientWidth, host.clientHeight).parent(host);
-          p.pixelDensity(Math.min(window.devicePixelRatio, 2));
-        };
-
-        p.windowResized = () => {
-          const host = $('#layered-canvas');
-          p.resizeCanvas(host.clientWidth, host.clientHeight);
-        };
-
-        p.draw = () => {
-          const cx = p.width * 0.5;
-          const cy = p.height * 0.34;
-
-          drawRoom(p, cx, cy);
-          drawLamp(p, cx + 222, cy - 48);
-
-          drawBackChair(p, cx, cy);
-          drawTableBack(p, cx, cy);
-          if (state.seated) drawSeatedAvatar(p, cx, cy);
-          drawTableFrontOccluder(p, cx, cy);
-          drawFrontChair(p, cx, cy);
-
-          p.noStroke();
-          p.fill('rgba(255, 219, 147, 0.8)');
-          for (let i = 0; i < 26; i++) {
-            const t = (p.frameCount * 0.003 + i * 0.137) % 1;
-            p.circle(p.width * (0.22 + t * 0.62), p.height * (0.22 + Math.sin(i) * 0.18), 1.5);
-          }
-        };
-
-        p.mousePressed = () => {
-          state.seated = true;
-          updateStatus();
-        };
-      }
-
-      function updateStatus() {
-        state.name = $('#nickname').value.trim() || '无名自习者';
-        $('#status').textContent = state.seated
-          ? `${state.name} 已坐下：后方椅背 -> 小人 -> 桌面前缘，这是真分层遮挡。`
-          : '这是一个只验证图层关系的版本：桌子前缘会真的挡住小人。';
-      }
-
-      $('#sit-button').addEventListener('click', () => {
-        state.seated = true;
-        updateStatus();
+      $('#sit-button').addEventListener('click', () => updateStatus(true));
+      $('#leave-button').addEventListener('click', () => updateStatus(false));
+      $('#nickname').addEventListener('input', () => {
+        if (!$('#avatar').classList.contains('hidden')) updateStatus(true);
       });
-
-      $('#leave-button').addEventListener('click', () => {
-        state.seated = false;
-        updateStatus();
-      });
-
-      $('#nickname').addEventListener('input', updateStatus);
-
-      new p5(sketch);
     </script>
   </body>
 </html>
