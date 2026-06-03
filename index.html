@@ -235,6 +235,7 @@
           cupX: 0.205,
           cupY: 0.39,
           kind: 'window',
+          avatar: { dx: 0.006, dy: -0.014, h: 0.215, flip: true, nameDy: -0.12 },
           pov: {
             title: '窗边雨景位',
             image: 'assets/window-rain-pov-v1.png',
@@ -249,6 +250,7 @@
           cupX: 0.405,
           cupY: 0.29,
           kind: 'window',
+          avatar: { dx: 0.008, dy: -0.018, h: 0.2, flip: false, nameDy: -0.11 },
           pov: {
             title: '斜阳双人桌',
             image: 'assets/window-sunset-pov-v1.png',
@@ -263,6 +265,7 @@
           cupX: 0.675,
           cupY: 0.35,
           kind: 'bar',
+          avatar: { dx: -0.005, dy: -0.015, h: 0.19, flip: true, nameDy: -0.105 },
           pov: {
             title: '吧台灯下位',
             image: 'assets/bar-lamp-pov-v1.png',
@@ -277,6 +280,7 @@
           cupX: 0.235,
           cupY: 0.695,
           kind: 'plant',
+          avatar: { dx: 0.003, dy: -0.012, h: 0.205, flip: false, nameDy: -0.115 },
           pov: {
             title: '屏幕绿植位',
             image: 'assets/plant-corner-pov-v1.png',
@@ -291,6 +295,7 @@
           cupX: 0.54,
           cupY: 0.61,
           kind: 'table',
+          avatar: { dx: -0.006, dy: -0.016, h: 0.19, flip: true, nameDy: -0.105 },
           pov: {
             title: '中央圆桌位',
             image: 'assets/middle-focus-pov-v1.png',
@@ -305,6 +310,7 @@
           cupX: 0.725,
           cupY: 0.635,
           kind: 'lamp',
+          avatar: { dx: 0.006, dy: -0.012, h: 0.195, flip: false, nameDy: -0.11 },
           pov: {
             title: '沙发阅读位',
             image: 'assets/lamp-cove-pov-v1.png',
@@ -319,6 +325,7 @@
           cupX: 0.83,
           cupY: 0.75,
           kind: 'quiet',
+          avatar: { dx: -0.008, dy: -0.01, h: 0.185, flip: true, nameDy: -0.1 },
           pov: {
             title: '后排低频位',
             image: 'assets/quiet-back-pov-v1.png',
@@ -743,7 +750,7 @@
             },
           );
           studentSprite = p.loadImage(
-            'assets/student-sprite-v1-trimmed.png',
+            'assets/student-seated-v1.png',
             () => {},
             () => {
               studentSprite = null;
@@ -916,11 +923,12 @@
         }
 
         if (occupied) {
-          drawTinyStudent(p, x, y, isMine, studentSprite);
+          drawTinyStudent(p, x, y, isMine, studentSprite, seat.avatar);
           p.fill('rgba(244, 234, 216, 0.72)');
           p.textAlign(p.CENTER, p.CENTER);
           p.textSize(11);
-          p.text(occupied.name || 'guest', x, y - 61);
+          const base = bgView.valid ? bgView.h : p.height;
+          p.text(occupied.name || 'guest', x, y + (seat.avatar?.nameDy || -0.11) * base);
         } else if (isHovered) {
           p.fill('rgba(255, 206, 127, 0.16)');
           p.ellipse(x, y, 34, 18);
@@ -931,18 +939,25 @@
         }
       }
 
-      function drawTinyStudent(p, x, y, isMine, studentSprite) {
+      function drawTinyStudent(p, x, y, isMine, studentSprite, avatar = {}) {
+        const base = bgView.valid ? bgView.h : p.height;
+        const drawX = x + (avatar.dx || 0) * base;
+        const drawY = y + (avatar.dy || 0) * base;
+        const spriteHeight = (avatar.h || 0.19) * base;
         p.push();
-        p.translate(x, y);
+        p.translate(drawX, drawY);
         p.noStroke();
         p.fill(0, 0, 0, 46);
-        p.ellipse(0, 20, 38, 13);
+        p.ellipse(0, spriteHeight * 0.28, spriteHeight * 0.48, spriteHeight * 0.16);
 
         if (studentSprite && studentSprite.width > 1) {
-          const spriteHeight = isMine ? 84 : 78;
-          const spriteWidth = (studentSprite.width / studentSprite.height) * spriteHeight;
+          const finalHeight = isMine ? spriteHeight * 1.04 : spriteHeight;
+          const spriteWidth = (studentSprite.width / studentSprite.height) * finalHeight;
           p.imageMode(p.CENTER);
-          p.image(studentSprite, 0, -21, spriteWidth, spriteHeight);
+          p.push();
+          p.scale(avatar.flip ? -1 : 1, 1);
+          p.image(studentSprite, 0, -finalHeight * 0.18, spriteWidth, finalHeight);
+          p.pop();
           p.pop();
           return;
         }
