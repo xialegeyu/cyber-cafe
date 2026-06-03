@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>分层咖啡馆原型</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              dusk: '#15120f',
+              wall: '#7b514f',
+              floor: '#4b3a34',
+              amber: '#e7a756',
+              paper: '#f4ead8',
+              moss: '#536246',
+            },
+            fontFamily: {
+              sans: ['Nunito', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        background:
+          radial-gradient(circle at 50% 18%, rgba(231, 167, 86, 0.18), transparent 26rem),
+          linear-gradient(180deg, #6e363e 0%, #2a1e1d 70%, #15120f 100%);
+      }
+
+      .glass {
+        border: 1px solid rgba(244, 234, 216, 0.16);
+        background: rgba(20, 16, 13, 0.72);
+        box-shadow: 0 22px 80px rgba(0, 0, 0, 0.34);
+        backdrop-filter: blur(18px);
+      }
+
+      #layered-canvas canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen text-paper antialiased">
+    <main class="mx-auto flex min-h-screen max-w-6xl flex-col gap-4 px-4 py-4">
+      <section class="glass relative h-[68vh] min-h-[520px] overflow-hidden rounded-lg p-2">
+        <div id="layered-canvas" class="h-full w-full"></div>
+        <div class="pointer-events-none absolute left-6 top-5">
+          <p class="text-xs uppercase tracking-[0.28em] text-amber/70">layered prototype</p>
+          <h1 class="mt-2 text-2xl font-semibold">单桌分层咖啡馆</h1>
+        </div>
+      </section>
+
+      <section class="glass grid gap-3 rounded-lg p-4 md:grid-cols-[1fr_auto_auto] md:items-end">
+        <label class="block">
+          <span class="text-xs uppercase tracking-[0.22em] text-paper/50">nickname</span>
+          <input
+            id="nickname"
+            maxlength="12"
+            placeholder="今晚坐一会儿"
+            class="mt-2 w-full rounded-md border border-paper/10 bg-dusk/70 px-3 py-2 text-sm outline-none ring-amber/30 transition focus:ring-2"
+          />
+        </label>
+        <button
+          id="sit-button"
+          class="rounded-md bg-amber px-5 py-2 text-sm font-semibold text-dusk transition hover:bg-[#f0bd72]"
+        >
+          坐下
+        </button>
+        <button
+          id="leave-button"
+          class="rounded-md border border-paper/15 px-5 py-2 text-sm text-paper/70 transition hover:border-paper/30 hover:text-paper"
+        >
+          起身
+        </button>
+        <p id="status" class="text-sm text-paper/60 md:col-span-3">这是一个只验证图层关系的版本：桌子前缘会真的挡住小人。</p>
+      </section>
+    </main>
+
+    <script>
+      const state = {
+        seated: false,
+        name: '',
+      };
+
+      const $ = (selector) => document.querySelector(selector);
+
+      function iso(cx, cy, x, y) {
+        return {
+          x: cx + (x - y) * 0.866,
+          y: cy + (x + y) * 0.5,
+        };
+      }
+
+      function drawIsoRect(p, cx, cy, x, y, w, d, color) {
+        const a = iso(cx, cy, x, y);
+        const b = iso(cx, cy, x + w, y);
+        const c = iso(cx, cy, x + w, y + d);
+        const e = iso(cx, cy, x, y + d);
+        p.fill(color);
+        p.quad(a.x, a.y, b.x, b.y, c.x, c.y, e.x, e.y);
+      }
+
+      function drawIsoBox(p, cx, cy, x, y, w, d, h, top, left, right) {
+        const a = iso(cx, cy, x, y);
+        const b = iso(cx, cy, x + w, y);
+        const c = iso(cx, cy, x + w, y + d);
+        const e = iso(cx, cy, x, y + d);
+        const ah = { x: a.x, y: a.y - h };
+        const bh = { x: b.x, y: b.y - h };
+        const ch = { x: c.x, y: c.y - h };
+        const eh = { x: e.x, y: e.y - h };
+
+        p.noStroke();
+        p.fill(left);
+        p.quad(e.x, e.y, c.x, c.y, ch.x, ch.y, eh.x, eh.y);
+        p.fill(right);
+        p.quad(b.x, b.y, c.x, c.y, ch.x, ch.y, bh.x, bh.y);
+        p.fill(top);
+        p.quad(ah.x, ah.y, bh.x, bh.y, ch.x, ch.y, eh.x, eh.y);
+      }
+
+      function drawRoom(p, cx, cy) {
+        p.background('#6d3940');
+
+        drawIsoRect(p, cx, cy, -250, -180, 520, 420, '#4f4039');
+        for (let i = -240; i < 280; i += 32) {
+          const a = iso(cx, cy, i, -180);
+          const b = iso(cx, cy, i, 240);
+          p.stroke('rgba(244, 234, 216, 0.05)');
+          p.line(a.x, a.y, b.x, b.y);
+        }
+        for (let i = -180; i < 260; i += 32) {
+          const a = iso(cx, cy, -250, i);
+          const b = iso(cx, cy, 270, i);
+          p.stroke('rgba(244, 234, 216, 0.05)');
+          p.line(a.x, a.y, b.x, b.y);
+        }
+
+        p.noStroke();
+        p.fill('#855755');
+        p.quad(cx - 390, cy - 196, cx - 70, cy - 360, cx - 70, cy - 188, cx - 390, cy - 25);
+        p.fill('#6d4747');
+        p.quad(cx - 70, cy - 360, cx + 322, cy - 150, cx + 322, cy + 22, cx - 70, cy - 188);
+
+        p.fill('#f0b96e');
+        p.quad(cx + 132, cy - 172, cx + 240, cy - 112, cx + 240, cy - 30, cx + 132, cy - 92);
+        p.fill('rgba(255, 214, 132, 0.38)');
+        p.quad(cx + 132, cy - 92, cx + 240, cy - 30, cx + 115, cy + 162, cx + 24, cy + 96);
+
+        drawBookshelf(p, cx - 210, cy - 182);
+        drawPlant(p, cx + 140, cy + 20, 0.9);
+      }
+
+      function drawBookshelf(p, x, y) {
+        p.noStroke();
+        p.fill('#6a4630');
+        p.rect(x, y, 82, 126, 4);
+        p.fill('#8f653b');
+        p.rect(x + 8, y + 15, 66, 10);
+        p.rect(x + 8, y + 54, 66, 10);
+        p.rect(x + 8, y + 92, 66, 10);
+        ['#c77854', '#d9a452', '#6f825f', '#cfc1a1'].forEach((color, index) => {
+          p.fill(color);
+          p.rect(x + 14 + index * 14, y + 27, 9, 25, 2);
+          p.rect(x + 18 + index * 12, y + 66, 8, 24, 2);
+        });
+      }
+
+      function drawPlant(p, x, y, s) {
+        p.push();
+        p.translate(x, y);
+        p.scale(s);
+        p.noStroke();
+        p.fill('#4f392b');
+        p.rect(-11, 24, 22, 24, 4);
+        p.fill('#536246');
+        for (let i = 0; i < 9; i++) {
+          const angle = i * 0.72;
+          p.ellipse(Math.cos(angle) * 24, Math.sin(angle) * 13, 18, 44);
+        }
+        p.pop();
+      }
+
+      function drawBackChair(p, cx, cy) {
+        const pos = iso(cx, cy, -28, 30);
+        p.push();
+        p.translate(pos.x, pos.y);
+        p.noStroke();
+        p.fill('#6f472f');
+        p.rect(-34, -94, 68, 70, 12);
+        p.fill('#8c6240');
+        p.rect(-42, -35, 84, 44, 10);
+        p.fill('#3e2b22');
+        p.rect(-38, 6, 10, 66, 4);
+        p.rect(28, 6, 10, 66, 4);
+        p.pop();
+      }
+
+      function drawSeatedAvatar(p, cx, cy) {
+        const pos = iso(cx, cy, -28, 22);
+        p.push();
+        p.translate(pos.x, pos.y);
+        p.noStroke();
+
+        p.fill('rgba(0, 0, 0, 0.18)');
+        p.ellipse(0, 58, 96, 28);
+
+        p.fill('#5b3728');
+        p.ellipse(0, -48, 54, 54);
+        p.fill('#f0c39f');
+        p.ellipse(2, -34, 30, 34);
+        p.fill('#873f35');
+        p.quad(-38, -22, 26, -34, 42, 36, -30, 48);
+        p.fill('#54352a');
+        p.quad(-62, 24, -18, 32, -8, 76, -68, 62);
+        p.fill('#304438');
+        p.quad(12, 32, 56, 24, 66, 70, 16, 78);
+        p.fill('#f0c39f');
+        p.ellipse(-38, 0, 15, 13);
+        p.ellipse(36, -6, 14, 12);
+        p.fill('#f5c975');
+        p.ellipse(45, -12, 18, 20);
+        p.fill('#38251f');
+        p.ellipse(45, -14, 11, 7);
+        p.pop();
+      }
+
+      function drawTableBack(p, cx, cy) {
+        drawIsoBox(p, cx, cy, -90, -52, 160, 104, 20, '#8a6138', '#654329', '#5a3925');
+      }
+
+      function drawTableFrontOccluder(p, cx, cy) {
+        const a = iso(cx, cy, -90, 52);
+        const b = iso(cx, cy, 70, 52);
+        const c = iso(cx, cy, 70, 78);
+        const d = iso(cx, cy, -90, 78);
+        p.noStroke();
+        p.fill('#704a2b');
+        p.quad(a.x, a.y - 20, b.x, b.y - 20, c.x, c.y - 3, d.x, d.y - 3);
+        p.fill('rgba(245, 191, 106, 0.25)');
+        p.quad(a.x + 4, a.y - 22, b.x - 4, b.y - 22, b.x - 10, b.y - 14, a.x + 10, a.y - 14);
+
+        const cup = iso(cx, cy, 18, 8);
+        p.fill('#e4d0aa');
+        p.ellipse(cup.x, cup.y - 24, 22, 14);
+        p.fill('#3b2a22');
+        p.ellipse(cup.x, cup.y - 26, 14, 8);
+      }
+
+      function drawFrontChair(p, cx, cy) {
+        const pos = iso(cx, cy, -38, 88);
+        p.push();
+        p.translate(pos.x, pos.y);
+        p.noStroke();
+        p.fill('#7b5134');
+        p.rect(-36, -28, 72, 28, 8);
+        p.fill('#3c2921');
+        p.rect(-34, -2, 8, 54, 4);
+        p.rect(26, -2, 8, 54, 4);
+        p.pop();
+      }
+
+      function drawLamp(p, x, y) {
+        p.noStroke();
+        p.fill('rgba(255, 191, 91, 0.2)');
+        p.ellipse(x, y + 18, 120, 92);
+        p.fill('#df8b4e');
+        p.triangle(x - 24, y, x + 24, y, x, y - 42);
+        p.fill('#f6c36c');
+        p.ellipse(x, y + 2, 50, 14);
+      }
+
+      function sketch(p) {
+        p.setup = () => {
+          const host = $('#layered-canvas');
+          p.createCanvas(host.clientWidth, host.clientHeight).parent(host);
+          p.pixelDensity(Math.min(window.devicePixelRatio, 2));
+        };
+
+        p.windowResized = () => {
+          const host = $('#layered-canvas');
+          p.resizeCanvas(host.clientWidth, host.clientHeight);
+        };
+
+        p.draw = () => {
+          const cx = p.width * 0.5;
+          const cy = p.height * 0.36;
+
+          drawRoom(p, cx, cy);
+          drawLamp(p, cx + 250, cy - 40);
+
+          drawBackChair(p, cx, cy);
+          if (state.seated) drawSeatedAvatar(p, cx, cy);
+          drawTableBack(p, cx, cy);
+          drawTableFrontOccluder(p, cx, cy);
+          drawFrontChair(p, cx, cy);
+
+          p.noStroke();
+          p.fill('rgba(255, 219, 147, 0.8)');
+          for (let i = 0; i < 26; i++) {
+            const t = (p.frameCount * 0.003 + i * 0.137) % 1;
+            p.circle(p.width * (0.22 + t * 0.62), p.height * (0.22 + Math.sin(i) * 0.18), 1.5);
+          }
+        };
+
+        p.mousePressed = () => {
+          state.seated = true;
+          updateStatus();
+        };
+      }
+
+      function updateStatus() {
+        state.name = $('#nickname').value.trim() || '无名自习者';
+        $('#status').textContent = state.seated
+          ? `${state.name} 已坐下：后方椅背 -> 小人 -> 桌面前缘，这是真分层遮挡。`
+          : '这是一个只验证图层关系的版本：桌子前缘会真的挡住小人。';
+      }
+
+      $('#sit-button').addEventListener('click', () => {
+        state.seated = true;
+        updateStatus();
+      });
+
+      $('#leave-button').addEventListener('click', () => {
+        state.seated = false;
+        updateStatus();
+      });
+
+      $('#nickname').addEventListener('input', updateStatus);
+
+      new p5(sketch);
+    </script>
+  </body>
+</html>
