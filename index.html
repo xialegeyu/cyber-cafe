@@ -235,7 +235,7 @@
           cupX: 0.205,
           cupY: 0.39,
           kind: 'window',
-          avatar: { dx: 0.006, dy: -0.014, h: 0.215, flip: true, nameDy: -0.12 },
+          avatar: { dx: 0.006, dy: -0.014, h: 0.215, flip: true, nameDy: -0.12, clipBottom: 0.22 },
           pov: {
             title: '窗边雨景位',
             image: 'assets/window-rain-pov-v1.png',
@@ -250,7 +250,7 @@
           cupX: 0.405,
           cupY: 0.29,
           kind: 'window',
-          avatar: { dx: 0.008, dy: -0.018, h: 0.2, flip: false, nameDy: -0.11 },
+          avatar: { dx: 0.008, dy: -0.018, h: 0.2, flip: false, nameDy: -0.11, clipBottom: 0.19 },
           pov: {
             title: '斜阳双人桌',
             image: 'assets/window-sunset-pov-v1.png',
@@ -265,7 +265,7 @@
           cupX: 0.675,
           cupY: 0.35,
           kind: 'bar',
-          avatar: { dx: -0.005, dy: -0.015, h: 0.19, flip: true, nameDy: -0.105 },
+          avatar: { dx: -0.005, dy: -0.015, h: 0.19, flip: true, nameDy: -0.105, clipBottom: 0.08 },
           pov: {
             title: '吧台灯下位',
             image: 'assets/bar-lamp-pov-v1.png',
@@ -280,7 +280,7 @@
           cupX: 0.235,
           cupY: 0.695,
           kind: 'plant',
-          avatar: { dx: 0.003, dy: -0.012, h: 0.205, flip: false, nameDy: -0.115 },
+          avatar: { dx: 0.003, dy: -0.012, h: 0.205, flip: false, nameDy: -0.115, clipBottom: 0.18 },
           pov: {
             title: '屏幕绿植位',
             image: 'assets/plant-corner-pov-v1.png',
@@ -295,7 +295,7 @@
           cupX: 0.54,
           cupY: 0.61,
           kind: 'table',
-          avatar: { dx: -0.006, dy: -0.016, h: 0.19, flip: true, nameDy: -0.105 },
+          avatar: { dx: -0.006, dy: -0.016, h: 0.19, flip: true, nameDy: -0.105, clipBottom: 0.02 },
           pov: {
             title: '中央圆桌位',
             image: 'assets/middle-focus-pov-v1.png',
@@ -310,7 +310,7 @@
           cupX: 0.725,
           cupY: 0.635,
           kind: 'lamp',
-          avatar: { dx: 0.006, dy: -0.012, h: 0.195, flip: false, nameDy: -0.11 },
+          avatar: { dx: 0.006, dy: -0.012, h: 0.195, flip: false, nameDy: -0.11, clipBottom: 0.12 },
           pov: {
             title: '沙发阅读位',
             image: 'assets/lamp-cove-pov-v1.png',
@@ -325,7 +325,7 @@
           cupX: 0.83,
           cupY: 0.75,
           kind: 'quiet',
-          avatar: { dx: -0.008, dy: -0.01, h: 0.185, flip: true, nameDy: -0.1 },
+          avatar: { dx: -0.008, dy: -0.01, h: 0.185, flip: true, nameDy: -0.1, clipBottom: 0.08 },
           pov: {
             title: '后排低频位',
             image: 'assets/quiet-back-pov-v1.png',
@@ -782,7 +782,9 @@
             drawSunbeams(p);
             drawPlants(p);
           }
-          seats.forEach((seat) => drawSeat(p, seat, studentSprite));
+          [...seats]
+            .sort((a, b) => (a.avatar?.z ?? a.y) - (b.avatar?.z ?? b.y))
+            .forEach((seat) => drawSeat(p, seat, studentSprite));
           drawParticles(p, particles);
           state.refills = state.refills.filter((refill) => Date.now() - refill.bornAt < 3000);
         };
@@ -953,10 +955,23 @@
         if (studentSprite && studentSprite.width > 1) {
           const finalHeight = isMine ? spriteHeight * 1.04 : spriteHeight;
           const spriteWidth = (studentSprite.width / studentSprite.height) * finalHeight;
+          const imageCenterY = -finalHeight * 0.18;
+          const imageTop = imageCenterY - finalHeight * 0.5;
+          const clipBottom = avatar.clipBottom === undefined ? imageCenterY + finalHeight * 0.5 : finalHeight * avatar.clipBottom;
           p.imageMode(p.CENTER);
           p.push();
           p.scale(avatar.flip ? -1 : 1, 1);
-          p.image(studentSprite, 0, -finalHeight * 0.18, spriteWidth, finalHeight);
+          if (avatar.clipBottom !== undefined) {
+            const ctx = p.drawingContext;
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(-spriteWidth * 0.52, imageTop - 2, spriteWidth * 1.04, clipBottom - imageTop);
+            ctx.clip();
+          }
+          p.image(studentSprite, 0, imageCenterY, spriteWidth, finalHeight);
+          if (avatar.clipBottom !== undefined) {
+            p.drawingContext.restore();
+          }
           p.pop();
           p.pop();
           return;
