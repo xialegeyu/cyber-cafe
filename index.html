@@ -45,28 +45,6 @@
           rgba(12, 10, 7, 0.7);
       }
 
-      .rain-veil {
-        background:
-          repeating-linear-gradient(
-            100deg,
-            transparent 0,
-            transparent 17px,
-            rgba(218, 236, 244, 0.18) 18px,
-            transparent 20px
-          ),
-          repeating-linear-gradient(
-            82deg,
-            transparent 0,
-            transparent 31px,
-            rgba(245, 224, 176, 0.12) 32px,
-            transparent 35px
-          );
-        filter: blur(0.4px);
-        mix-blend-mode: screen;
-        opacity: 0.42;
-        animation: rainDrift 3.8s linear infinite;
-      }
-
       .glass-trails {
         background:
           radial-gradient(circle at 24% 34%, rgba(255, 238, 190, 0.18), transparent 8rem),
@@ -83,19 +61,6 @@
           inset 0 0 6rem rgba(233, 173, 87, 0.2),
           inset 0 -8rem 10rem rgba(10, 8, 6, 0.5);
         animation: windowGlow 7.2s ease-in-out infinite;
-      }
-
-      @keyframes rainDrift {
-        from {
-          background-position:
-            0 0,
-            0 0;
-        }
-        to {
-          background-position:
-            -72px 210px,
-            44px 170px;
-        }
       }
 
       @keyframes glassPulse {
@@ -223,7 +188,6 @@
         </div>
         <div class="relative min-h-0 flex-1">
           <img id="pov-image" class="h-full w-full object-cover" alt="窗边雨景第一视角" />
-          <div class="rain-veil pointer-events-none absolute inset-0"></div>
           <div class="glass-trails pointer-events-none absolute inset-0"></div>
           <div class="window-breath pointer-events-none absolute inset-0"></div>
           <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-dusk/82 to-transparent px-5 pb-5 pt-20">
