@@ -39,6 +39,12 @@
         backdrop-filter: blur(18px);
       }
 
+      .pov-backdrop {
+        background:
+          linear-gradient(180deg, rgba(12, 10, 7, 0.16), rgba(12, 10, 7, 0.76)),
+          rgba(12, 10, 7, 0.7);
+      }
+
       input[type='range'] {
         accent-color: #e9ad57;
       }
@@ -111,15 +117,76 @@
           >
             默默续杯
           </button>
+          <div id="pov-panel" class="hidden rounded-md border border-paper/10 bg-paper/5 p-3">
+            <p class="text-xs uppercase tracking-[0.22em] text-paper/45">first person</p>
+            <p id="pov-copy" class="mt-2 text-sm leading-6 text-paper/72">坐下后可以切换到这个座位的第一视角。</p>
+            <button
+              id="pov-button"
+              class="mt-3 w-full rounded-md border border-ember/30 bg-ember/15 px-3 py-2 text-sm font-semibold text-paper transition hover:bg-ember/25"
+            >
+              进入第一视角
+            </button>
+          </div>
           <p id="soft-toast" class="min-h-5 text-xs text-paper/50"></p>
         </section>
       </aside>
     </main>
 
+    <div id="pov-view" class="pov-backdrop fixed inset-0 z-50 hidden p-4 backdrop-blur-sm md:p-8">
+      <div class="mx-auto flex h-full max-w-6xl flex-col overflow-hidden rounded-lg border border-paper/15 bg-dusk shadow-2xl">
+        <div class="flex items-center justify-between border-b border-paper/10 px-4 py-3">
+          <div>
+            <p class="text-xs uppercase tracking-[0.22em] text-paper/45">first person view</p>
+            <h2 id="pov-title" class="mt-1 text-lg font-semibold text-paper">窗边雨景位</h2>
+          </div>
+          <button
+            id="pov-close"
+            class="rounded-md border border-paper/15 px-3 py-2 text-xs text-paper/75 transition hover:border-ember/40 hover:text-paper"
+          >
+            返回总览
+          </button>
+        </div>
+        <div class="relative min-h-0 flex-1">
+          <img id="pov-image" class="h-full w-full object-cover" alt="窗边雨景第一视角" />
+          <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-dusk/82 to-transparent px-5 pb-5 pt-20">
+            <p id="pov-caption" class="max-w-xl text-sm leading-6 text-paper/76">
+              雨滴贴着玻璃往下走，外面的灯被拉成很慢的光。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
       const seats = [
-        { id: 'window-rain-1', name: '窗边雨景位', x: 0.145, y: 0.505, cupX: 0.205, cupY: 0.39, kind: 'window' },
-        { id: 'window-rain-2', name: '斜阳双人桌', x: 0.35, y: 0.32, cupX: 0.405, cupY: 0.29, kind: 'window' },
+        {
+          id: 'window-rain-1',
+          name: '窗边雨景位',
+          x: 0.145,
+          y: 0.505,
+          cupX: 0.205,
+          cupY: 0.39,
+          kind: 'window',
+          pov: {
+            title: '窗边雨景位',
+            image: 'assets/window-rain-pov-v1.png',
+            copy: '雨滴贴着玻璃往下走，外面的灯被拉成很慢的光。',
+          },
+        },
+        {
+          id: 'window-rain-2',
+          name: '斜阳双人桌',
+          x: 0.35,
+          y: 0.32,
+          cupX: 0.405,
+          cupY: 0.29,
+          kind: 'window',
+          pov: {
+            title: '斜阳双人桌',
+            image: 'assets/window-rain-pov-v1.png',
+            copy: '坐在窗边，雨声和室内暖光刚好隔着一层玻璃。',
+          },
+        },
         { id: 'bar-1', name: '吧台灯下位', x: 0.645, y: 0.345, cupX: 0.675, cupY: 0.35, kind: 'bar' },
         { id: 'plant-corner', name: '屏幕绿植位', x: 0.195, y: 0.745, cupX: 0.235, cupY: 0.695, kind: 'plant' },
         { id: 'middle-focus', name: '中央圆桌位', x: 0.515, y: 0.665, cupX: 0.54, cupY: 0.61, kind: 'table' },
@@ -386,6 +453,35 @@
         const seat = seats.find((item) => item.id === state.me.seatId);
         $('#seat-status').textContent = seat ? `${state.me.name || '你'} · ${seat.name}` : '还没入座';
         if (!state.selectedVisitor) $('#refill-button').classList.add('hidden');
+        updatePovPanel(seat);
+      }
+
+      function updatePovPanel(seat) {
+        const panel = $('#pov-panel');
+        if (!seat || !seat.pov) {
+          panel.classList.add('hidden');
+          return;
+        }
+
+        $('#pov-copy').textContent = `${seat.name} 可以切换到第一视角。`;
+        panel.classList.remove('hidden');
+      }
+
+      function openPovView() {
+        const seat = seats.find((item) => item.id === state.me.seatId);
+        if (!seat || !seat.pov) {
+          softToast('这个座位还没有第一视角。');
+          return;
+        }
+
+        $('#pov-title').textContent = seat.pov.title;
+        $('#pov-caption').textContent = seat.pov.copy;
+        $('#pov-image').src = seat.pov.image;
+        $('#pov-view').classList.remove('hidden');
+      }
+
+      function closePovView() {
+        $('#pov-view').classList.add('hidden');
       }
 
       function leaveSeat() {
@@ -795,6 +891,11 @@
       });
       $('#leave-seat').addEventListener('click', leaveSeat);
       $('#refill-button').addEventListener('click', sendQuietRefill);
+      $('#pov-button').addEventListener('click', openPovView);
+      $('#pov-close').addEventListener('click', closePovView);
+      $('#pov-view').addEventListener('click', (event) => {
+        if (event.target.id === 'pov-view') closePovView();
+      });
     </script>
   </body>
 </html>
