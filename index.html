@@ -47,38 +47,63 @@
 
       .glass-trails {
         background:
-          radial-gradient(circle at 24% 34%, rgba(255, 238, 190, 0.18), transparent 8rem),
-          radial-gradient(circle at 78% 62%, rgba(116, 157, 174, 0.22), transparent 10rem),
-          linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+          radial-gradient(circle at 18% 38%, rgba(255, 214, 130, 0.3), transparent 7rem),
+          radial-gradient(circle at 68% 56%, rgba(130, 178, 196, 0.28), transparent 10rem),
+          radial-gradient(circle at 86% 42%, rgba(255, 211, 142, 0.2), transparent 7rem),
+          linear-gradient(106deg, transparent 20%, rgba(255, 242, 207, 0.16) 48%, transparent 72%);
         mix-blend-mode: screen;
-        opacity: 0.5;
-        animation: glassPulse 5.6s ease-in-out infinite;
+        opacity: 0.76;
+        animation: glassPulse 6.2s ease-in-out infinite;
+      }
+
+      .bokeh-breath {
+        background:
+          radial-gradient(circle at 35% 48%, rgba(255, 177, 83, 0.18), transparent 5rem),
+          radial-gradient(circle at 55% 68%, rgba(255, 201, 110, 0.15), transparent 4rem),
+          radial-gradient(circle at 76% 58%, rgba(128, 170, 190, 0.16), transparent 6rem);
+        filter: blur(18px);
+        mix-blend-mode: screen;
+        opacity: 0.56;
+        animation: bokehBreath 4.8s ease-in-out infinite;
       }
 
       .window-breath {
         box-shadow:
           inset 0 0 0 1px rgba(244, 234, 216, 0.08),
-          inset 0 0 6rem rgba(233, 173, 87, 0.2),
-          inset 0 -8rem 10rem rgba(10, 8, 6, 0.5);
-        animation: windowGlow 7.2s ease-in-out infinite;
+          inset 0 0 6rem rgba(233, 173, 87, 0.3),
+          inset 0 -8rem 10rem rgba(10, 8, 6, 0.5),
+          inset 0 0 12rem rgba(105, 145, 160, 0.16);
+        animation: windowGlow 5.4s ease-in-out infinite;
       }
 
       @keyframes glassPulse {
         0%,
         100% {
-          opacity: 0.36;
-          transform: translate3d(0, 0, 0);
+          opacity: 0.5;
+          transform: translate3d(-1.8%, 0.8%, 0) scale(1.02);
         }
         50% {
-          opacity: 0.58;
-          transform: translate3d(1.4%, -0.8%, 0);
+          opacity: 0.86;
+          transform: translate3d(2.2%, -1.4%, 0) scale(1.05);
+        }
+      }
+
+      @keyframes bokehBreath {
+        0%,
+        100% {
+          opacity: 0.28;
+          transform: scale(0.98);
+        }
+        48% {
+          opacity: 0.72;
+          transform: scale(1.04);
         }
       }
 
       @keyframes windowGlow {
         0%,
         100% {
-          opacity: 0.86;
+          opacity: 0.68;
         }
         50% {
           opacity: 1;
@@ -188,6 +213,7 @@
         </div>
         <div class="relative min-h-0 flex-1">
           <img id="pov-image" class="h-full w-full object-cover" alt="窗边雨景第一视角" />
+          <div class="bokeh-breath pointer-events-none absolute inset-0"></div>
           <div class="glass-trails pointer-events-none absolute inset-0"></div>
           <div class="window-breath pointer-events-none absolute inset-0"></div>
           <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-dusk/82 to-transparent px-5 pb-5 pt-20">
