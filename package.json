@@ -1,0 +1,8 @@
+{
+  "name": "cyber-sunset-cafe",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "watch:deploy": "node auto-deploy.js"
+  }
+}

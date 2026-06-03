@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>赛博斜阳自习咖啡馆</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            },
+            colors: {
+              dusk: '#15130f',
+              ember: '#e9ad57',
+              moss: '#66775a',
+              paper: '#f4ead8',
+              cedar: '#8f6b4b',
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        background:
+          radial-gradient(circle at 12% 10%, rgba(233, 173, 87, 0.22), transparent 28rem),
+          linear-gradient(135deg, #17140f 0%, #272117 52%, #15130f 100%);
+      }
+
+      .glass {
+        border: 1px solid rgba(244, 234, 216, 0.14);
+        background: rgba(30, 25, 18, 0.68);
+        box-shadow: 0 20px 70px rgba(0, 0, 0, 0.34);
+        backdrop-filter: blur(18px);
+      }
+
+      input[type='range'] {
+        accent-color: #e9ad57;
+      }
+
+      #cafe-canvas canvas {
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 8px;
+        display: block;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen text-paper antialiased">
+    <main class="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-4 px-4 py-4 lg:grid lg:grid-cols-[1fr_360px]">
+      <section class="glass relative min-h-[62vh] overflow-hidden rounded-lg p-2 lg:min-h-[calc(100vh-2rem)]">
+        <div id="cafe-canvas" class="h-[62vh] w-full lg:h-full"></div>
+        <div class="pointer-events-none absolute left-5 top-5 max-w-xs">
+          <p class="text-xs uppercase tracking-[0.28em] text-ember/75">lo-fi focus room</p>
+          <h1 class="mt-2 text-2xl font-semibold leading-tight text-paper">赛博斜阳自习咖啡馆</h1>
+        </div>
+      </section>
+
+      <aside class="glass flex flex-col gap-4 rounded-lg p-4">
+        <section class="space-y-3">
+          <div>
+            <label for="nickname" class="text-xs uppercase tracking-[0.22em] text-paper/55">nickname</label>
+            <input
+              id="nickname"
+              maxlength="12"
+              placeholder="今晚坐一会儿"
+              class="mt-2 w-full rounded-md border border-paper/10 bg-dusk/70 px-3 py-2 text-sm text-paper outline-none ring-ember/30 transition focus:ring-2"
+            />
+          </div>
+
+          <div class="rounded-md border border-ember/20 bg-ember/10 p-3 text-sm leading-6 text-paper/78">
+            输入昵称，然后点击一把空椅子坐下。这里没有聊天，也没有排行榜；只有灯、雨声和一些安静的人。
+          </div>
+          <p id="presence-status" class="text-xs text-paper/45">多人同步：未连接（本地模式）</p>
+        </section>
+
+        <section class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs uppercase tracking-[0.22em] text-paper/55">ambient audio mix</h2>
+            <button
+              id="audio-toggle"
+              class="rounded-md border border-paper/15 bg-paper/10 px-3 py-2 text-xs font-medium text-paper transition hover:border-ember/50 hover:bg-ember/15"
+            >
+              启动声场
+            </button>
+          </div>
+          <div id="mixer" class="space-y-3"></div>
+        </section>
+
+        <section class="mt-auto space-y-3 rounded-md border border-paper/10 bg-dusk/45 p-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-[0.22em] text-paper/45">seat status</p>
+              <p id="seat-status" class="mt-1 text-sm text-paper/85">还没入座</p>
+            </div>
+            <button
+              id="leave-seat"
+              class="rounded-md border border-paper/10 px-3 py-2 text-xs text-paper/70 transition hover:border-paper/25 hover:text-paper"
+            >
+              起身
+            </button>
+          </div>
+          <button
+            id="refill-button"
+            class="hidden w-full rounded-md bg-ember px-3 py-2 text-sm font-semibold text-dusk transition hover:bg-[#f1be71]"
+          >
+            默默续杯
+          </button>
+          <p id="soft-toast" class="min-h-5 text-xs text-paper/50"></p>
+        </section>
+      </aside>
+    </main>
+
+    <script>
+      const seats = [
+        { id: 'window-rain-1', name: '窗边雨景位', x: 0.145, y: 0.505, cupX: 0.205, cupY: 0.39, kind: 'window' },
+        { id: 'window-rain-2', name: '斜阳双人桌', x: 0.35, y: 0.32, cupX: 0.405, cupY: 0.29, kind: 'window' },
+        { id: 'bar-1', name: '吧台灯下位', x: 0.645, y: 0.345, cupX: 0.675, cupY: 0.35, kind: 'bar' },
+        { id: 'plant-corner', name: '屏幕绿植位', x: 0.195, y: 0.745, cupX: 0.235, cupY: 0.695, kind: 'plant' },
+        { id: 'middle-focus', name: '中央圆桌位', x: 0.515, y: 0.665, cupX: 0.54, cupY: 0.61, kind: 'table' },
+        { id: 'lamp-cove', name: '沙发阅读位', x: 0.72, y: 0.66, cupX: 0.725, cupY: 0.635, kind: 'lamp' },
+        { id: 'quiet-back', name: '后排低频位', x: 0.86, y: 0.78, cupX: 0.83, cupY: 0.75, kind: 'quiet' },
+      ];
+
+      const state = {
+        me: {
+          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+          name: '',
+          seatId: null,
+          updatedAt: Date.now(),
+        },
+        selectedVisitor: null,
+        refills: [],
+        occupants: [],
+      };
+
+      const bgView = {
+        x: 0,
+        y: 0,
+        w: 0,
+        h: 0,
+        valid: false,
+      };
+
+      const SUPABASE_URL = 'https://ksykcymgpfhhfiyuuhpr.supabase.co';
+      const SUPABASE_PUBLISHABLE_KEY =
+        'sb_publishable_uyMjbgNwHmC6zY3qYG8Pdg_JR6QqjEd';
+      const ROOM_ID = `cafe-room-v1-${new URLSearchParams(window.location.search).get('room') || 'public'}`;
+      const supabaseClient = window.supabase && window.supabase.createClient
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
+        : null;
+
+      let presenceChannel = null;
+      let presenceReady = false;
+      let presenceTimer = null;
+      let lastPresencePayload = null;
+      let cachedSeatOwners = new Map();
+
+      const $ = (selector) => document.querySelector(selector);
+      const softToast = (text) => {
+        $('#soft-toast').textContent = text;
+        window.clearTimeout(softToast.timer);
+        softToast.timer = window.setTimeout(() => ($('#soft-toast').textContent = ''), 2600);
+      };
+
+      function findOccupant(seatId) {
+        return [...state.occupants, state.me].find((person) => person.seatId === seatId);
+      }
+
+      function findOwnerBySeat(seatId) {
+        return state.occupants.find((person) => person.seatId === seatId);
+      }
+
+      function syncSeatState(nextState) {
+        if (!nextState) return;
+        if (nextState.me) {
+          state.me = { ...state.me, ...nextState.me, updatedAt: Date.now() };
+        }
+        if (Array.isArray(nextState.occupants)) {
+          state.occupants = nextState.occupants;
+        }
+        if (nextState.selectedVisitor !== undefined) {
+          state.selectedVisitor = nextState.selectedVisitor;
+        }
+        if (Array.isArray(nextState.refills)) {
+          state.refills = nextState.refills;
+        }
+        updateSeatStatus();
+      }
+
+      function setPresenceStatus(text) {
+        $('#presence-status').textContent = `多人同步：${text}`;
+      }
+
+      function myPresencePayload() {
+        const typedName = $('#nickname').value.trim();
+        if (typedName) state.me.name = typedName;
+        return {
+          userId: state.me.id,
+          name: state.me.name || typedName || '自习者',
+          seatId: state.me.seatId,
+          updatedAt: Date.now(),
+        };
+      }
+
+      function publishMyPresence() {
+        if (!presenceReady || !presenceChannel) return;
+        const nextPayload = myPresencePayload();
+        if (lastPresencePayload && lastPresencePayload.userId === nextPayload.userId) {
+          const { userId, ...currentRest } = lastPresencePayload;
+          const { userId: _, ...nextRest } = nextPayload;
+          const isSame = JSON.stringify(currentRest) === JSON.stringify(nextRest);
+          if (isSame) return;
+        }
+
+        state.me = { ...state.me, ...nextPayload };
+        presenceChannel.track(nextPayload);
+        lastPresencePayload = { ...nextPayload };
+      }
+
+      function schedulePresencePublish() {
+        if (!presenceReady || !presenceChannel) return;
+        window.clearTimeout(presenceTimer);
+        presenceTimer = window.setTimeout(publishMyPresence, 140);
+      }
+
+      function applyPresenceSnapshot(snapshot) {
+        const remote = new Map();
+        const nextOwners = new Map();
+        Object.values(snapshot).forEach((entries) => {
+          if (!Array.isArray(entries)) return;
+          entries.forEach((person) => {
+            const userId = person.userId;
+            if (!userId || userId === state.me.id || !person.seatId) return;
+
+            const candidate = {
+              id: userId,
+              name: person.name || '自习者',
+              seatId: person.seatId,
+              updatedAt: person.updatedAt || 0,
+            };
+
+            const current = remote.get(candidate.seatId);
+            if (!current || candidate.updatedAt > current.updatedAt) {
+              remote.set(candidate.seatId, candidate);
+            }
+          });
+        });
+
+        nextOwners.clear();
+        remote.forEach((person) => nextOwners.set(person.seatId, person.id));
+
+        if (presenceChannel) {
+          const invalidSelection = state.selectedVisitor && !nextOwners.has(state.selectedVisitor.seatId);
+          if (invalidSelection) {
+            state.selectedVisitor = null;
+            $('#refill-button').classList.add('hidden');
+          }
+        }
+
+        if (cachedSeatOwners.size) {
+          const mineSeat = state.me.seatId;
+          if (mineSeat && cachedSeatOwners.get(mineSeat)) {
+            if (nextOwners.get(mineSeat) === undefined) {
+              // seat was vacated; keep local UI in sync
+              state.me.seatId = null;
+              softToast('刚刚有人离开，你的座位已释放。');
+            }
+          }
+        }
+
+        state.occupants = [...remote.values()];
+        cachedSeatOwners = nextOwners;
+
+        if (state.me.seatId) {
+          const intruder = state.occupants.find((person) => person.seatId === state.me.seatId);
+          if (intruder && intruder.updatedAt > (state.me.updatedAt || 0)) {
+            state.me.seatId = null;
+            state.selectedVisitor = null;
+            softToast(`${intruder.name || '对方'} 刚占了这把椅子`);
+            publishMyPresence();
+          }
+        }
+
+        updateSeatStatus();
+        if (!state.me.seatId) $('#refill-button').classList.add('hidden');
+      }
+
+      function subscribeSeatPresence() {
+        if (!supabaseClient) {
+          setPresenceStatus('未连接（本地模式）');
+          return;
+        }
+
+        presenceChannel = supabaseClient.channel(ROOM_ID, {
+          config: {
+            presence: {
+              key: state.me.id,
+            },
+          },
+        });
+
+        presenceChannel.on('presence', { event: 'sync' }, () => {
+          const snapshot = presenceChannel.presenceState();
+          applyPresenceSnapshot(snapshot);
+        });
+
+        presenceChannel.on('broadcast', { event: 'refill' }, ({ payload }) => {
+          if (!payload || !payload.seatId) return;
+          if (payload.fromUserId === state.me.id) return;
+          state.refills.push({ seatId: payload.seatId, bornAt: Date.now() });
+        });
+
+        presenceChannel.subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            presenceReady = true;
+            setPresenceStatus('已连接');
+            publishMyPresence();
+            const snapshot = presenceChannel.presenceState();
+            applyPresenceSnapshot(snapshot);
+            return;
+          }
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            presenceReady = false;
+            setPresenceStatus('暂时不可用（本地模式）');
+          }
+        });
+
+        window.addEventListener('beforeunload', () => {
+          if (presenceChannel) presenceChannel.untrack();
+        });
+      }
+
+      function sitAt(seat) {
+        const name = $('#nickname').value.trim() || '无名自习者';
+        const owner = findOwnerBySeat(seat.id);
+        if (owner) {
+          softToast('这张桌子已经有人在专注。');
+          if (!state.occupants.length) {
+            const ownerFromSync = state.occupants.find((person) => person.seatId === seat.id);
+            if (!ownerFromSync) softToast('我刷新到了最新状态，试试再点击一次。');
+          }
+          return;
+        }
+        if (state.me.seatId && state.me.seatId === seat.id) {
+          softToast('这张桌子已经有人在专注。');
+          return;
+        }
+        syncSeatState({ me: { ...state.me, name, seatId: seat.id, updatedAt: Date.now() } });
+        publishMyPresence();
+        state.selectedVisitor = null;
+        updateSeatStatus();
+        softToast(`已坐下：${seat.name}`);
+      }
+
+      function selectOccupant(person) {
+        if (!person || person.id === state.me.id) return;
+        state.selectedVisitor = person;
+        $('#refill-button').classList.remove('hidden');
+        softToast(`可以给 ${person.name} 默默续杯。`);
+      }
+
+      function sendQuietRefill() {
+        if (!state.selectedVisitor) return;
+        state.refills.push({ seatId: state.selectedVisitor.seatId, bornAt: Date.now() });
+        softToast('杯子轻轻亮了一下。');
+        if (presenceReady && presenceChannel) {
+          presenceChannel.send({
+            type: 'broadcast',
+            event: 'refill',
+            payload: {
+              seatId: state.selectedVisitor.seatId,
+              fromUserId: state.me.id,
+              toUserId: state.selectedVisitor.id,
+            },
+          });
+        }
+      }
+
+      function updateSeatStatus() {
+        const seat = seats.find((item) => item.id === state.me.seatId);
+        $('#seat-status').textContent = seat ? `${state.me.name || '你'} · ${seat.name}` : '还没入座';
+        if (!state.selectedVisitor) $('#refill-button').classList.add('hidden');
+      }
+
+      function leaveSeat() {
+        syncSeatState({ me: { ...state.me, seatId: null, updatedAt: Date.now() } });
+        publishMyPresence();
+        state.selectedVisitor = null;
+        updateSeatStatus();
+        softToast('你起身了，座位重新空出来。');
+      }
+
+      class AmbientMixer {
+        constructor() {
+          this.ctx = null;
+          this.started = false;
+          this.channels = [
+            { id: 'crowd', label: '咖啡馆人群喧闹 / 杯碟碰撞', volume: 0.18, pan: -0.26, filter: 1200 },
+            { id: 'rain', label: '窗外淅淅沥沥雨声', volume: 0.28, pan: 0.32, filter: 3200 },
+            { id: 'focus', label: '低频专注白噪声', volume: 0.12, pan: 0, filter: 180 },
+          ];
+          this.nodes = new Map();
+        }
+
+        async start() {
+          if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+          if (this.ctx.state === 'suspended') await this.ctx.resume();
+          if (this.started) {
+            return;
+          }
+          this.channels.forEach((channel) => {
+            const source = this.createNoiseSource(channel.id);
+            const filter = this.ctx.createBiquadFilter();
+            const gain = this.ctx.createGain();
+            const panner = this.ctx.createStereoPanner();
+
+            filter.type = channel.id === 'focus' ? 'lowpass' : 'bandpass';
+            filter.frequency.value = channel.filter;
+            filter.Q.value = channel.id === 'rain' ? 0.7 : 1.2;
+            gain.gain.value = channel.volume;
+            panner.pan.value = channel.pan;
+
+            source.connect(filter);
+            filter.connect(gain);
+            gain.connect(panner);
+            panner.connect(this.ctx.destination);
+            source.start();
+            this.nodes.set(channel.id, { source, gain });
+          });
+          this.started = true;
+        }
+
+        stop() {
+          this.nodes.forEach((node) => {
+            try {
+              node.source.stop();
+            } catch (_) {
+              // ignore stop exceptions if source has already ended
+            }
+            node.source.disconnect();
+            node.gain.disconnect();
+          });
+          this.nodes.clear();
+          this.started = false;
+        }
+
+        createNoiseSource(id) {
+          const seconds = 3;
+          const buffer = this.ctx.createBuffer(2, this.ctx.sampleRate * seconds, this.ctx.sampleRate);
+          for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
+            const data = buffer.getChannelData(channel);
+            let last = 0;
+            for (let i = 0; i < data.length; i++) {
+              const white = Math.random() * 2 - 1;
+              last = id === 'focus' ? last * 0.985 + white * 0.015 : white;
+              const rainFlicker = id === 'rain' && Math.random() > 0.995 ? Math.random() * 0.8 : 0;
+              const cupTick = id === 'crowd' && Math.random() > 0.998 ? Math.sin(i * 0.28) * 0.9 : 0;
+              data[i] = (last + rainFlicker + cupTick) * 0.42;
+            }
+          }
+          const source = this.ctx.createBufferSource();
+          source.buffer = buffer;
+          source.loop = true;
+          return source;
+        }
+
+        setVolume(id, value) {
+          const node = this.nodes.get(id);
+          const channel = this.channels.find((item) => item.id === id);
+          channel.volume = Number(value);
+          if (node && this.ctx) node.gain.gain.setTargetAtTime(channel.volume, this.ctx.currentTime, 0.03);
+        }
+      }
+
+      const mixer = new AmbientMixer();
+
+      function mountMixer() {
+        const root = $('#mixer');
+        mixer.channels.forEach((channel) => {
+          const row = document.createElement('label');
+          row.className = 'block rounded-md border border-paper/10 bg-paper/5 p-3';
+          row.innerHTML = `
+            <span class="flex items-center justify-between gap-3 text-xs text-paper/70">
+              <span>${channel.label}</span>
+              <span data-volume="${channel.id}">${Math.round(channel.volume * 100)}%</span>
+            </span>
+            <input class="mt-3 w-full" type="range" min="0" max="0.7" step="0.01" value="${channel.volume}" />
+          `;
+          row.querySelector('input').addEventListener('input', (event) => {
+            mixer.setVolume(channel.id, event.target.value);
+            row.querySelector(`[data-volume="${channel.id}"]`).textContent = `${Math.round(event.target.value * 100)}%`;
+          });
+          root.appendChild(row);
+        });
+      }
+
+      function sketch(p) {
+        let particles = [];
+        let cafeBackground = null;
+        let studentSprite = null;
+
+        p.preload = () => {
+          cafeBackground = p.loadImage(
+            'assets/cafe-bg-v1.png',
+            () => {},
+            () => {
+              cafeBackground = null;
+            },
+          );
+          studentSprite = p.loadImage(
+            'assets/student-sprite-v1-trimmed.png',
+            () => {},
+            () => {
+              studentSprite = null;
+            },
+          );
+        };
+
+        p.setup = () => {
+          const host = $('#cafe-canvas');
+          p.createCanvas(host.clientWidth, host.clientHeight).parent(host);
+          p.pixelDensity(Math.min(window.devicePixelRatio, 2));
+          particles = Array.from({ length: 90 }, () => ({
+            x: p.random(p.width),
+            y: p.random(p.height),
+            r: p.random(0.8, 2.4),
+            drift: p.random(0.15, 0.55),
+            glow: p.random(40, 130),
+          }));
+        };
+
+        p.windowResized = () => {
+          const host = $('#cafe-canvas');
+          p.resizeCanvas(host.clientWidth, host.clientHeight);
+        };
+
+        p.draw = () => {
+          drawRoom(p, cafeBackground);
+          if (!cafeBackground || cafeBackground.width <= 1) {
+            drawSunbeams(p);
+            drawPlants(p);
+          }
+          seats.forEach((seat) => drawSeat(p, seat, studentSprite));
+          drawParticles(p, particles);
+          state.refills = state.refills.filter((refill) => Date.now() - refill.bornAt < 3000);
+        };
+
+        const seatTap = () => {
+          const hit = seats.find((seat) => {
+            const position = seatToCanvas(p, seat);
+            return p.dist(p.mouseX, p.mouseY, position.x, position.y) < 30;
+          });
+          if (!hit) return;
+          const occupant = findOccupant(hit.id);
+          if (occupant) selectOccupant(occupant);
+          else sitAt(hit);
+        };
+
+        p.mousePressed = seatTap;
+        p.touchStarted = () => {
+          seatTap();
+          return false;
+        };
+      }
+
+      function seatToCanvas(p, seat) {
+        const x = bgView.valid
+          ? seat.x * bgView.w + bgView.x
+          : seat.x * p.width;
+        const y = bgView.valid
+          ? seat.y * bgView.h + bgView.y
+          : seat.y * p.height;
+        const cupX = bgView.valid
+          ? (seat.cupX || seat.x) * bgView.w + bgView.x
+          : (seat.cupX || seat.x) * p.width;
+        const cupY = bgView.valid
+          ? (seat.cupY || seat.y) * bgView.h + bgView.y
+          : (seat.cupY || seat.y) * p.height;
+
+        return { x, y, cupX, cupY };
+      }
+
+      function coverImage(p, img) {
+        const canvasRatio = p.width / p.height;
+        const imageRatio = img.width / img.height;
+        let drawWidth = p.width;
+        let drawHeight = p.height;
+        if (imageRatio > canvasRatio) {
+          drawWidth = p.width;
+          drawHeight = drawWidth / imageRatio;
+          bgView.y = (p.height - drawHeight) / 2;
+          bgView.x = 0;
+          bgView.w = drawWidth;
+          bgView.h = drawHeight;
+          bgView.valid = true;
+        } else {
+          drawHeight = p.height;
+          drawWidth = drawHeight * imageRatio;
+          bgView.x = (p.width - drawWidth) / 2;
+          bgView.y = 0;
+          bgView.w = drawWidth;
+          bgView.h = drawHeight;
+          bgView.valid = true;
+        }
+        p.image(img, bgView.x, bgView.y, bgView.w, bgView.h);
+      }
+
+      function drawRoom(p, cafeBackground) {
+        if (cafeBackground && cafeBackground.width > 1) {
+          bgView.valid = false;
+          coverImage(p, cafeBackground);
+          bgView.valid = true;
+          p.noStroke();
+          p.fill('rgba(23, 18, 12, 0.18)');
+          p.rect(0, 0, p.width, p.height);
+          p.fill('rgba(255, 198, 108, 0.08)');
+          p.rect(0, 0, p.width, p.height);
+          return;
+        }
+
+        p.background('#1b1711');
+        p.noStroke();
+        p.fill('#2a2117');
+        p.rect(0, 0, p.width, p.height);
+
+        for (let i = 0; i < 18; i++) {
+          const y = p.map(i, 0, 17, p.height * 0.12, p.height * 0.96);
+          p.stroke(i % 2 ? '#3a2b1d' : '#4a3522');
+          p.strokeWeight(3);
+          p.line(-40, y, p.width + 80, y + p.height * 0.16);
+        }
+
+        p.noStroke();
+        p.fill('#101826');
+        p.rect(p.width * 0.06, p.height * 0.06, p.width * 0.34, p.height * 0.08, 6);
+        p.fill('rgba(130, 160, 180, 0.35)');
+        for (let i = 0; i < 18; i++) {
+          const x = p.width * 0.08 + i * 18;
+          p.rect(x, p.height * 0.07 + (i % 3) * 2, 2, p.height * 0.05, 10);
+        }
+      }
+
+      function drawSunbeams(p) {
+        p.noStroke();
+        p.fill('rgba(233, 173, 87, 0.16)');
+        p.quad(p.width * 0.03, p.height * 0.12, p.width * 0.38, p.height * 0.12, p.width * 0.88, p.height, p.width * 0.44, p.height);
+        p.fill('rgba(255, 210, 130, 0.09)');
+        p.quad(p.width * 0.16, p.height * 0.12, p.width * 0.3, p.height * 0.12, p.width * 0.68, p.height, p.width * 0.52, p.height);
+      }
+
+      function drawPlants(p) {
+        const pots = [
+          [p.width * 0.1, p.height * 0.72],
+          [p.width * 0.92, p.height * 0.2],
+          [p.width * 0.86, p.height * 0.86],
+        ];
+        pots.forEach(([x, y]) => {
+          p.fill('#6e4b35');
+          p.rect(x - 12, y, 24, 18, 4);
+          p.fill('#66775a');
+          for (let i = 0; i < 7; i++) p.ellipse(x + p.cos(i) * 14, y - 12 - p.sin(i * 1.7) * 12, 12, 28);
+        });
+      }
+
+      function drawSeat(p, seat, studentSprite) {
+        const { x, y, cupX, cupY } = seatToCanvas(p, seat);
+        const occupied = findOccupant(seat.id);
+        const isMine = occupied?.id === state.me.id;
+        const refill = state.refills.find((item) => item.seatId === seat.id);
+        const isHovered = p.dist(p.mouseX, p.mouseY, x, y) < 30;
+
+        p.noStroke();
+        if (refill) {
+          const alpha = p.map(Date.now() - refill.bornAt, 0, 3000, 180, 0);
+          p.fill(255, 220, 145, alpha);
+          p.ellipse(cupX, cupY, 34, 24);
+          p.fill('#ffd88a');
+          p.ellipse(cupX, cupY, 13, 9);
+          p.fill('#38291e');
+          p.ellipse(cupX, cupY - 1, 8, 5);
+        }
+
+        if (occupied) {
+          drawTinyStudent(p, x, y, isMine, studentSprite);
+          p.fill('rgba(244, 234, 216, 0.72)');
+          p.textAlign(p.CENTER, p.CENTER);
+          p.textSize(11);
+          p.text(occupied.name || 'guest', x, y - 61);
+        } else if (isHovered) {
+          p.fill('rgba(255, 206, 127, 0.16)');
+          p.ellipse(x, y, 34, 18);
+          p.fill('rgba(244, 234, 216, 0.74)');
+          p.textAlign(p.CENTER, p.CENTER);
+          p.textSize(10);
+          p.text('点击坐下', x, y + 25);
+        }
+      }
+
+      function drawTinyStudent(p, x, y, isMine, studentSprite) {
+        p.push();
+        p.translate(x, y);
+        p.noStroke();
+        p.fill(0, 0, 0, 46);
+        p.ellipse(0, 20, 38, 13);
+
+        if (studentSprite && studentSprite.width > 1) {
+          const spriteHeight = isMine ? 84 : 78;
+          const spriteWidth = (studentSprite.width / studentSprite.height) * spriteHeight;
+          p.imageMode(p.CENTER);
+          p.image(studentSprite, 0, -21, spriteWidth, spriteHeight);
+          p.pop();
+          return;
+        }
+
+        p.push();
+        p.translate(0, -4);
+        p.noStroke();
+
+        p.fill(isMine ? '#efb15f' : '#7c8b68');
+        p.ellipse(0, 6, 30, 34);
+        p.rect(-13, 4, 26, 25, 10);
+
+        p.fill('#f1c9a2');
+        p.ellipse(0, -15, 25, 25);
+
+        p.fill('#443326');
+        p.arc(0, -18, 27, 24, p.PI, p.TWO_PI);
+        p.ellipse(-10, -12, 7, 12);
+        p.ellipse(10, -12, 7, 12);
+
+        p.fill('#3b2b20');
+        p.ellipse(-4, -15, 2.2, 2.2);
+        p.ellipse(5, -15, 2.2, 2.2);
+        p.stroke('#b77d6d');
+        p.strokeWeight(1.2);
+        p.noFill();
+        p.arc(1, -10, 7, 5, 0.1, p.PI - 0.1);
+
+        p.noStroke();
+        p.fill(isMine ? '#fff0bb' : '#e4d8bb');
+        p.rect(-12, 8, 24, 7, 4);
+
+        p.stroke('#f1c9a2');
+        p.strokeWeight(5);
+        p.line(-12, 10, -20, 18);
+        p.line(12, 10, 20, 18);
+        p.noStroke();
+        p.fill('#f1c9a2');
+        p.ellipse(-21, 19, 6, 5);
+        p.ellipse(21, 19, 6, 5);
+
+        p.pop();
+        p.pop();
+      }
+
+      function drawParticles(p, particles) {
+        p.noStroke();
+        particles.forEach((particle) => {
+          particle.x += particle.drift;
+          particle.y += p.sin((p.frameCount + particle.glow) * 0.01) * 0.12;
+          if (particle.x > p.width + 5) particle.x = -5;
+          p.fill(255, 218, 151, particle.glow);
+          p.circle(particle.x, particle.y, particle.r);
+        });
+      }
+
+      mountMixer();
+      subscribeSeatPresence();
+      updateSeatStatus();
+      new p5(sketch);
+
+      $('#nickname').addEventListener('input', () => {
+        state.me.name = $('#nickname').value.trim() || '';
+        schedulePresencePublish();
+      });
+
+      $('#audio-toggle').addEventListener('click', async () => {
+        const btn = $('#audio-toggle');
+        if (mixer.started) {
+          mixer.stop();
+          btn.textContent = '启动声场';
+          softToast('声场已关闭。');
+          return;
+        }
+
+        await mixer.start();
+        btn.textContent = '关闭声场';
+        softToast('本地白噪声开始轻轻铺开。');
+      });
+      $('#leave-seat').addEventListener('click', leaveSeat);
+      $('#refill-button').addEventListener('click', sendQuietRefill);
+    </script>
+  </body>
+</html>
