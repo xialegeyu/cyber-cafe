@@ -123,16 +123,16 @@
     </style>
   </head>
   <body class="min-h-screen text-paper antialiased">
-    <main class="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-4 px-4 py-4 lg:grid lg:grid-cols-[1fr_360px]">
-      <section class="glass relative min-h-[62vh] overflow-hidden rounded-lg p-2 lg:min-h-[calc(100vh-2rem)]">
-        <div id="cafe-canvas" class="h-[62vh] w-full lg:h-full"></div>
+    <main class="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-4 px-4 py-4">
+      <section class="glass relative min-h-[58vh] overflow-hidden rounded-lg p-2 md:min-h-[62vh] lg:min-h-[calc(100vh-17rem)]">
+        <div id="cafe-canvas" class="h-[58vh] w-full md:h-[62vh] lg:h-[calc(100vh-17rem)]"></div>
         <div class="pointer-events-none absolute left-5 top-5 max-w-xs">
           <p class="text-xs uppercase tracking-[0.28em] text-ember/75">lo-fi focus room</p>
           <h1 class="mt-2 text-2xl font-semibold leading-tight text-paper">赛博斜阳自习咖啡馆</h1>
         </div>
       </section>
 
-      <aside class="glass flex flex-col gap-4 rounded-lg p-4">
+      <aside class="glass grid gap-4 rounded-lg p-4 md:grid-cols-[minmax(240px,0.9fr)_minmax(320px,1fr)]">
         <section class="space-y-3">
           <div>
             <label for="nickname" class="text-xs uppercase tracking-[0.22em] text-paper/55">nickname</label>
@@ -150,20 +150,7 @@
           <p id="presence-status" class="text-xs text-paper/45">多人同步：未连接（本地模式）</p>
         </section>
 
-        <section class="space-y-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xs uppercase tracking-[0.22em] text-paper/55">ambient audio mix</h2>
-            <button
-              id="audio-toggle"
-              class="rounded-md border border-paper/15 bg-paper/10 px-3 py-2 text-xs font-medium text-paper transition hover:border-ember/50 hover:bg-ember/15"
-            >
-              启动声场
-            </button>
-          </div>
-          <div id="mixer" class="space-y-3"></div>
-        </section>
-
-        <section class="mt-auto space-y-3 rounded-md border border-paper/10 bg-dusk/45 p-3">
+        <section class="space-y-3 rounded-md border border-paper/10 bg-dusk/45 p-3">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-xs uppercase tracking-[0.22em] text-paper/45">seat status</p>
@@ -193,6 +180,19 @@
             </button>
           </div>
           <p id="soft-toast" class="min-h-5 text-xs text-paper/50"></p>
+        </section>
+
+        <section class="space-y-3 md:col-span-2">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="text-xs uppercase tracking-[0.22em] text-paper/55">ambient audio mix</h2>
+            <button
+              id="audio-toggle"
+              class="shrink-0 rounded-md border border-paper/15 bg-paper/10 px-3 py-2 text-xs font-medium text-paper transition hover:border-ember/50 hover:bg-ember/15"
+            >
+              启动声场
+            </button>
+          </div>
+          <div id="mixer" class="grid gap-2 md:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3"></div>
         </section>
       </aside>
     </main>
@@ -713,13 +713,13 @@
         const root = $('#mixer');
         mixer.channels.forEach((channel) => {
           const row = document.createElement('label');
-          row.className = 'block rounded-md border border-paper/10 bg-paper/5 p-3';
+          row.className = 'block rounded-md border border-paper/10 bg-paper/5 p-2.5';
           row.innerHTML = `
-            <span class="flex items-center justify-between gap-3 text-xs text-paper/70">
-              <span>${channel.label}</span>
-              <span data-volume="${channel.id}">${Math.round(channel.volume * 100)}%</span>
+            <span class="flex items-center justify-between gap-2 text-[11px] leading-4 text-paper/70">
+              <span class="min-w-0">${channel.label}</span>
+              <span class="shrink-0 text-paper/50" data-volume="${channel.id}">${Math.round(channel.volume * 100)}%</span>
             </span>
-            <input class="mt-3 w-full" type="range" min="0" max="0.7" step="0.01" value="${channel.volume}" />
+            <input class="mt-2 w-full" type="range" min="0" max="0.7" step="0.01" value="${channel.volume}" />
           `;
           row.querySelector('input').addEventListener('input', (event) => {
             mixer.setVolume(channel.id, event.target.value);
