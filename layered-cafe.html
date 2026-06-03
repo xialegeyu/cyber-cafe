@@ -129,33 +129,33 @@
       function drawRoom(p, cx, cy) {
         p.background('#6d3940');
 
-        drawIsoRect(p, cx, cy, -250, -180, 520, 420, '#4f4039');
-        for (let i = -240; i < 280; i += 32) {
-          const a = iso(cx, cy, i, -180);
-          const b = iso(cx, cy, i, 240);
+        drawIsoRect(p, cx, cy, -260, -155, 500, 360, '#4f4039');
+        for (let i = -250; i < 260; i += 32) {
+          const a = iso(cx, cy, i, -155);
+          const b = iso(cx, cy, i, 205);
           p.stroke('rgba(244, 234, 216, 0.05)');
           p.line(a.x, a.y, b.x, b.y);
         }
-        for (let i = -180; i < 260; i += 32) {
+        for (let i = -155; i < 220; i += 32) {
           const a = iso(cx, cy, -250, i);
-          const b = iso(cx, cy, 270, i);
+          const b = iso(cx, cy, 240, i);
           p.stroke('rgba(244, 234, 216, 0.05)');
           p.line(a.x, a.y, b.x, b.y);
         }
 
         p.noStroke();
         p.fill('#855755');
-        p.quad(cx - 390, cy - 196, cx - 70, cy - 360, cx - 70, cy - 188, cx - 390, cy - 25);
+        p.quad(cx - 355, cy - 182, cx - 55, cy - 338, cx - 55, cy - 168, cx - 355, cy - 12);
         p.fill('#6d4747');
-        p.quad(cx - 70, cy - 360, cx + 322, cy - 150, cx + 322, cy + 22, cx - 70, cy - 188);
+        p.quad(cx - 55, cy - 338, cx + 288, cy - 154, cx + 288, cy + 12, cx - 55, cy - 168);
 
         p.fill('#f0b96e');
-        p.quad(cx + 132, cy - 172, cx + 240, cy - 112, cx + 240, cy - 30, cx + 132, cy - 92);
+        p.quad(cx + 112, cy - 166, cx + 208, cy - 112, cx + 208, cy - 40, cx + 112, cy - 94);
         p.fill('rgba(255, 214, 132, 0.38)');
-        p.quad(cx + 132, cy - 92, cx + 240, cy - 30, cx + 115, cy + 162, cx + 24, cy + 96);
+        p.quad(cx + 112, cy - 94, cx + 208, cy - 40, cx + 88, cy + 130, cx + 12, cy + 72);
 
-        drawBookshelf(p, cx - 210, cy - 182);
-        drawPlant(p, cx + 140, cy + 20, 0.9);
+        drawBookshelf(p, cx - 214, cy - 166);
+        drawPlant(p, cx + 140, cy + 6, 0.78);
       }
 
       function drawBookshelf(p, x, y) {
@@ -189,25 +189,26 @@
       }
 
       function drawBackChair(p, cx, cy) {
-        const pos = iso(cx, cy, -28, 30);
+        const pos = iso(cx, cy, -56, 48);
         p.push();
         p.translate(pos.x, pos.y);
         p.noStroke();
         p.fill('#6f472f');
-        p.rect(-34, -94, 68, 70, 12);
+        p.rect(-32, -88, 64, 64, 12);
         p.fill('#8c6240');
-        p.rect(-42, -35, 84, 44, 10);
+        p.rect(-38, -35, 76, 40, 10);
         p.fill('#3e2b22');
-        p.rect(-38, 6, 10, 66, 4);
-        p.rect(28, 6, 10, 66, 4);
+        p.rect(-34, 2, 9, 52, 4);
+        p.rect(25, 2, 9, 52, 4);
         p.pop();
       }
 
       function drawSeatedAvatar(p, cx, cy) {
-        const pos = iso(cx, cy, -28, 22);
+        const pos = iso(cx, cy, -58, 42);
         p.push();
         p.translate(pos.x, pos.y);
         p.noStroke();
+        p.scale(0.86);
 
         p.fill('rgba(0, 0, 0, 0.18)');
         p.ellipse(0, 58, 96, 28);
@@ -233,21 +234,21 @@
       }
 
       function drawTableBack(p, cx, cy) {
-        drawIsoBox(p, cx, cy, -90, -52, 160, 104, 20, '#8a6138', '#654329', '#5a3925');
+        drawIsoBox(p, cx, cy, -70, -44, 138, 86, 18, '#8a6138', '#654329', '#5a3925');
       }
 
       function drawTableFrontOccluder(p, cx, cy) {
-        const a = iso(cx, cy, -90, 52);
-        const b = iso(cx, cy, 70, 52);
-        const c = iso(cx, cy, 70, 78);
-        const d = iso(cx, cy, -90, 78);
+        const a = iso(cx, cy, -70, 42);
+        const b = iso(cx, cy, 68, 42);
+        const c = iso(cx, cy, 68, 60);
+        const d = iso(cx, cy, -70, 60);
         p.noStroke();
         p.fill('#704a2b');
-        p.quad(a.x, a.y - 20, b.x, b.y - 20, c.x, c.y - 3, d.x, d.y - 3);
+        p.quad(a.x, a.y - 18, b.x, b.y - 18, c.x, c.y - 5, d.x, d.y - 5);
         p.fill('rgba(245, 191, 106, 0.25)');
         p.quad(a.x + 4, a.y - 22, b.x - 4, b.y - 22, b.x - 10, b.y - 14, a.x + 10, a.y - 14);
 
-        const cup = iso(cx, cy, 18, 8);
+        const cup = iso(cx, cy, 20, 4);
         p.fill('#e4d0aa');
         p.ellipse(cup.x, cup.y - 24, 22, 14);
         p.fill('#3b2a22');
@@ -255,7 +256,7 @@
       }
 
       function drawFrontChair(p, cx, cy) {
-        const pos = iso(cx, cy, -38, 88);
+        const pos = iso(cx, cy, -82, 86);
         p.push();
         p.translate(pos.x, pos.y);
         p.noStroke();
@@ -291,14 +292,14 @@
 
         p.draw = () => {
           const cx = p.width * 0.5;
-          const cy = p.height * 0.36;
+          const cy = p.height * 0.34;
 
           drawRoom(p, cx, cy);
-          drawLamp(p, cx + 250, cy - 40);
+          drawLamp(p, cx + 222, cy - 48);
 
           drawBackChair(p, cx, cy);
-          if (state.seated) drawSeatedAvatar(p, cx, cy);
           drawTableBack(p, cx, cy);
+          if (state.seated) drawSeatedAvatar(p, cx, cy);
           drawTableFrontOccluder(p, cx, cy);
           drawFrontChair(p, cx, cy);
 
