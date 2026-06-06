@@ -1,0 +1,101 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="CafeBackground" type="Sprite2D" parent="."]
+centered = false
+
+[node name="Seats" type="Node2D" parent="."]
+
+[node name="SeatHotspots" type="Node2D" parent="."]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="TopBar" type="Panel" parent="UI"]
+offset_left = 20.0
+offset_top = 18.0
+offset_right = 1428.0
+offset_bottom = 94.0
+
+[node name="TitleLabel" type="Label" parent="UI/TopBar"]
+offset_left = 24.0
+offset_top = 19.0
+offset_right = 178.0
+offset_bottom = 50.0
+text = "Neko Cafe"
+
+[node name="NameInput" type="LineEdit" parent="UI/TopBar"]
+offset_left = 206.0
+offset_top = 18.0
+offset_right = 376.0
+offset_bottom = 50.0
+placeholder_text = "Cat name"
+text = "Momo"
+
+[node name="CatSelector" type="OptionButton" parent="UI/TopBar"]
+offset_left = 394.0
+offset_top = 18.0
+offset_right = 552.0
+offset_bottom = 50.0
+
+[node name="MusicSelector" type="OptionButton" parent="UI/TopBar"]
+offset_left = 572.0
+offset_top = 18.0
+offset_right = 734.0
+offset_bottom = 50.0
+
+[node name="MusicToggle" type="CheckButton" parent="UI/TopBar"]
+offset_left = 750.0
+offset_top = 12.0
+offset_right = 860.0
+offset_bottom = 56.0
+text = "Sound"
+
+[node name="OnlineLabel" type="Label" parent="UI/TopBar"]
+offset_left = 902.0
+offset_top = 20.0
+offset_right = 1106.0
+offset_bottom = 50.0
+text = "1 online"
+
+[node name="ShareButton" type="Button" parent="UI/TopBar"]
+offset_left = 1230.0
+offset_top = 16.0
+offset_right = 1384.0
+offset_bottom = 52.0
+text = "Share room"
+
+[node name="HintLabel" type="Label" parent="UI/TopBar"]
+offset_left = 24.0
+offset_top = 52.0
+offset_right = 980.0
+offset_bottom = 72.0
+text = "Hover a table to see whether it is open. Click one to sit and study together."
+
+[node name="SeatLabel" type="Label" parent="UI"]
+visible = false
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 240.0
+offset_bottom = 34.0
+horizontal_alignment = 1
+
+[node name="NameTag" type="Label" parent="UI"]
+visible = false
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 160.0
+offset_bottom = 28.0
+horizontal_alignment = 1
+
+[node name="DebugLabel" type="Label" parent="UI"]
+offset_left = 24.0
+offset_top = 1040.0
+offset_right = 850.0
+offset_bottom = 1072.0
+text = "State: loading"
+
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="."]

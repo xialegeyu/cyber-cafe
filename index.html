@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtual Cafe MVP</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell" aria-labelledby="page-title">
+      <section class="intro">
+        <p class="eyebrow">Virtual Cafe MVP</p>
+        <h1 id="page-title">一间咖啡馆，两种坐下视角</h1>
+        <p class="intro-copy">
+          共享同一个咖啡馆背景：Seat A 是原来的正面圆桌，Seat B 是左后侧靠窗桌位。
+        </p>
+      </section>
+
+      <section class="scene-panel" aria-label="Cozy virtual cafe scene">
+        <div class="cafe-scene" id="cafeScene" data-active-seat="none">
+          <img
+            class="layer room-bg"
+            src="assets/cafe/room-bg.png"
+            alt="暖色咖啡馆共享背景"
+          />
+
+          <img
+            class="layer seat-layer seat-a-layer chair-layer"
+            src="assets/cafe/chair-layer.png"
+            alt="Seat A 的椅子和后方家具层"
+          />
+          <img
+            class="layer seat-layer seat-b-layer chair-layer"
+            src="assets/cafe/seat-b-chair-layer.png"
+            alt="Seat B 的独立椅子层"
+          />
+          <img
+            class="layer seat-layer seat-b-layer desk-layer"
+            src="assets/cafe/seat-b-desk-layer.png"
+            alt="Seat B 的靠窗桌子层"
+          />
+
+          <img
+            class="layer seat-layer seat-a-layer avatar-layer is-hidden"
+            src="assets/cafe/avatar-seated.png"
+            alt="Seat A 正面圆桌处坐着的默认人物"
+          />
+          <img
+            class="layer seat-layer seat-b-layer avatar-layer is-hidden"
+            src="assets/cafe/seat-b-avatar-seated.png"
+            alt="Seat B 左后侧视角中坐在靠窗桌前的默认人物"
+          />
+
+          <img
+            class="layer seat-layer seat-a-layer table-front-layer"
+            src="assets/cafe/table-front-layer.png"
+            alt="Seat A 遮挡人物的圆桌前景层"
+          />
+          <div class="layer light-overlay" aria-hidden="true"></div>
+        </div>
+
+        <div class="controls" aria-label="Seat controls">
+          <button class="control-button primary" id="seatAButton" type="button">
+            <span class="button-icon" aria-hidden="true">▥</span>
+            Seat A
+          </button>
+          <button class="control-button primary" id="seatBButton" type="button">
+            <span class="button-icon" aria-hidden="true">▤</span>
+            Seat B
+          </button>
+          <button class="control-button" id="standButton" type="button">
+            <span class="button-icon" aria-hidden="true">●</span>
+            Stand up
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
