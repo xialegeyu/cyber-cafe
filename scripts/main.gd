@@ -32,6 +32,8 @@ const SEATS := [
 @onready var cafe_background: Sprite2D = $CafeBackground
 @onready var seats_root: Node2D = $Seats
 @onready var seat_hotspots: Node2D = $SeatHotspots
+@onready var top_bar: Panel = $UI/TopBar
+@onready var title_label: Label = $UI/TopBar/TitleLabel
 @onready var name_input: LineEdit = $UI/TopBar/NameInput
 @onready var cat_selector: OptionButton = $UI/TopBar/CatSelector
 @onready var music_selector: OptionButton = $UI/TopBar/MusicSelector
@@ -58,12 +60,28 @@ func _ready() -> void:
 	seat_hotspots.position = CONTENT_OFFSET
 	music_player.volume_db = 4.0
 
+	_style_ui()
 	_populate_controls()
 	_create_seats()
 	_connect_ui()
 	_update_music()
 	_update_room_status()
 	_update_debug_label()
+
+func _style_ui() -> void:
+	var bar_style := StyleBoxFlat.new()
+	bar_style.bg_color = Color(0.13, 0.08, 0.055, 0.96)
+	bar_style.border_color = Color(0.43, 0.25, 0.15, 1.0)
+	bar_style.set_border_width_all(2)
+	bar_style.set_corner_radius_all(16)
+	top_bar.add_theme_stylebox_override("panel", bar_style)
+
+	title_label.add_theme_color_override("font_color", Color(1.0, 0.86, 0.56))
+	title_label.add_theme_font_size_override("font_size", 24)
+	online_label.add_theme_color_override("font_color", Color(0.88, 1.0, 0.76))
+	hint_label.add_theme_color_override("font_color", Color(0.86, 0.70, 0.50))
+	seat_label.add_theme_color_override("font_color", Color(1.0, 0.92, 0.72))
+	name_tag.add_theme_color_override("font_color", Color(1.0, 0.92, 0.72))
 
 func _populate_controls() -> void:
 	for cat_id in CATS.keys():
