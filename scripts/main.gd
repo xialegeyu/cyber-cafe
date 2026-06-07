@@ -4,8 +4,8 @@ const SCENE_SIZE := Vector2(1448, 1086)
 const CONTENT_OFFSET := Vector2(0, 110)
 const BACKGROUND_PATH := "res://assets/cafe/front-cafe-scene-v3.png"
 const TABLE_PATH := "res://assets/cafe/front-table-chair-v1.png"
-const WHITE_NOISE_PATH := "res://assets/audio/white_noise.wav"
-const RAIN_PATH := "res://assets/audio/rain.wav"
+const FOCUS_NOISE_PATH := "res://assets/audio/low-focus-noise.wav"
+const WINDOW_RAIN_PATH := "res://assets/audio/window-rain.wav"
 
 const CATS := {
 	"calico": {
@@ -113,10 +113,10 @@ func _populate_controls() -> void:
 		cat_selector.set_item_metadata(cat_selector.item_count - 1, cat_id)
 	cat_selector.select(0)
 
-	music_selector.add_item("White noise")
-	music_selector.set_item_metadata(0, WHITE_NOISE_PATH)
-	music_selector.add_item("Rain")
-	music_selector.set_item_metadata(1, RAIN_PATH)
+	music_selector.add_item("Focus noise")
+	music_selector.set_item_metadata(0, FOCUS_NOISE_PATH)
+	music_selector.add_item("Window rain")
+	music_selector.set_item_metadata(1, WINDOW_RAIN_PATH)
 	music_selector.select(0)
 
 func _connect_ui() -> void:
