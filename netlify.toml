@@ -2,6 +2,15 @@
   publish = "dist/web"
   command = ""
 
+[functions]
+  directory = "netlify/functions"
+
+[[redirects]]
+  from = "/api/room"
+  to = "/.netlify/functions/room"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]

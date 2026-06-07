@@ -6,7 +6,7 @@ const BACKGROUND_PATH := "res://assets/cafe/front-cafe-scene-v3.png"
 const TABLE_PATH := "res://assets/cafe/front-table-chair-v1.png"
 const FOCUS_NOISE_PATH := "res://assets/audio/low-focus-noise.wav"
 const WINDOW_RAIN_PATH := "res://assets/audio/window-rain.wav"
-const ROOM_API_PATH := "/api/room"
+const ROOM_API_PATH := "/.netlify/functions/room"
 const JSON_HEADERS := ["Content-Type: application/json"]
 
 const CATS := {
