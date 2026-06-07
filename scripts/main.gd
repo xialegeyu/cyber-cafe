@@ -8,6 +8,8 @@ const FOCUS_NOISE_PATH := "res://assets/audio/low-focus-noise.wav"
 const WINDOW_RAIN_PATH := "res://assets/audio/window-rain.wav"
 const ROOM_API_PATH := "/.netlify/functions/room"
 const JSON_HEADERS := ["Content-Type: application/json"]
+const NAME_TAG_OFFSET := Vector2(50, -28)
+const MUSIC_VOLUME_DB := 12.0
 
 const CATS := {
 	"calico": {
@@ -94,7 +96,7 @@ func _ready() -> void:
 	cafe_background.z_index = 0
 	seats_root.position = CONTENT_OFFSET
 	seat_hotspots.position = CONTENT_OFFSET
-	music_player.volume_db = 4.0
+	music_player.volume_db = MUSIC_VOLUME_DB
 
 	_style_ui()
 	_populate_controls()
@@ -169,7 +171,9 @@ func _create_seats() -> void:
 		tag.visible = false
 		tag.size = Vector2(160, 28)
 		tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		tag.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		tag.add_theme_color_override("font_color", Color(1.0, 0.92, 0.72))
+		tag.add_theme_font_size_override("font_size", 18)
 		ui_layer.add_child(tag)
 
 		seat_nodes[seat["id"]] = {"root": seat_root, "table": table, "cat": cat, "tag": tag}
@@ -305,7 +309,7 @@ func _render_occupants() -> void:
 		_apply_cat_style(cat, occupant.get("cat_id", "calico"))
 		cat.visible = true
 		tag.text = occupant.get("name", "Guest cat")
-		tag.position = CONTENT_OFFSET + seat["position"] + Vector2(50, 22)
+		tag.position = CONTENT_OFFSET + seat["position"] + NAME_TAG_OFFSET
 		tag.visible = true
 
 func _update_room_status() -> void:
@@ -333,7 +337,7 @@ func _update_music() -> void:
 		stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
 	if music_player.stream != stream:
 		music_player.stream = stream
-	music_player.volume_db = 4.0
+	music_player.volume_db = MUSIC_VOLUME_DB
 	music_player.play()
 	_update_debug_label()
 
