@@ -6,6 +6,7 @@ type Occupant = {
   seat_id: string;
   cat_id: string;
   name: string;
+  order_id?: string;
   updated_at: number;
 };
 
@@ -120,6 +121,7 @@ export default async (req: Request, context: Context) => {
     seat_id: seatId,
     cat_id: String(body.cat_id || "calico").slice(0, 40),
     name: String(body.name || "Guest cat").slice(0, 32),
+    order_id: String(body.order_id || "").slice(0, 40),
     updated_at: now,
   };
   state.updated_at = now;

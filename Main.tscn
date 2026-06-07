@@ -54,15 +54,28 @@ offset_right = 860.0
 offset_bottom = 56.0
 text = "Sound"
 
+[node name="OrderSelector" type="OptionButton" parent="UI/TopBar"]
+offset_left = 872.0
+offset_top = 18.0
+offset_right = 1028.0
+offset_bottom = 50.0
+
+[node name="OrderButton" type="Button" parent="UI/TopBar"]
+offset_left = 1040.0
+offset_top = 16.0
+offset_right = 1130.0
+offset_bottom = 52.0
+text = "Order"
+
 [node name="OnlineLabel" type="Label" parent="UI/TopBar"]
-offset_left = 902.0
+offset_left = 1148.0
 offset_top = 20.0
-offset_right = 1106.0
+offset_right = 1230.0
 offset_bottom = 50.0
 text = "1 online"
 
 [node name="ShareButton" type="Button" parent="UI/TopBar"]
-offset_left = 1230.0
+offset_left = 1268.0
 offset_top = 16.0
 offset_right = 1384.0
 offset_bottom = 52.0

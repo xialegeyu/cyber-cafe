@@ -1,0 +1,242 @@
+[
+  {
+    "id": "mocha_coffee",
+    "name": "摩卡咖啡",
+    "category": "drink",
+    "image": "assets/cafe/menu/items/01-mocha_coffee.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "caramel_latte",
+    "name": "焦糖拿铁",
+    "category": "drink",
+    "image": "assets/cafe/menu/items/02-caramel_latte.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "hot_cocoa",
+    "name": "热可可",
+    "category": "drink",
+    "image": "assets/cafe/menu/items/03-hot_cocoa.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "cream_latte",
+    "name": "奶泡拿铁",
+    "category": "drink",
+    "image": "assets/cafe/menu/items/04-cream_latte.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "black_coffee",
+    "name": "黑咖啡",
+    "category": "drink",
+    "image": "assets/cafe/menu/items/05-black_coffee.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "whipped_latte",
+    "name": "奶油拿铁",
+    "category": "drink",
+    "image": "assets/cafe/menu/items/06-whipped_latte.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "paw_teapot",
+    "name": "猫爪茶壶",
+    "category": "drink",
+    "image": "assets/cafe/menu/items/07-paw_teapot.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "iced_milk_tea",
+    "name": "冰奶茶",
+    "category": "drink",
+    "image": "assets/cafe/menu/items/08-iced_milk_tea.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "lemon_soda",
+    "name": "柠檬汽水",
+    "category": "drink",
+    "image": "assets/cafe/menu/items/09-lemon_soda.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "butter_croissant",
+    "name": "黄油可颂",
+    "category": "food",
+    "image": "assets/cafe/menu/items/10-butter_croissant.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "chocolate_croissant",
+    "name": "巧克力可颂",
+    "category": "food",
+    "image": "assets/cafe/menu/items/11-chocolate_croissant.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "orange_pudding",
+    "name": "橘子布丁",
+    "category": "food",
+    "image": "assets/cafe/menu/items/12-orange_pudding.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "herb_savory_pie",
+    "name": "香草咸派",
+    "category": "food",
+    "image": "assets/cafe/menu/items/13-herb_savory_pie.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "cinnamon_roll",
+    "name": "肉桂卷",
+    "category": "food",
+    "image": "assets/cafe/menu/items/14-cinnamon_roll.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "strawberry_cake_box",
+    "name": "草莓蛋糕盒",
+    "category": "food",
+    "image": "assets/cafe/menu/items/15-strawberry_cake_box.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "custard_tart",
+    "name": "奶油蛋挞",
+    "category": "food",
+    "image": "assets/cafe/menu/items/16-custard_tart.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "chocolate_muffin",
+    "name": "巧克力松饼",
+    "category": "food",
+    "image": "assets/cafe/menu/items/17-chocolate_muffin.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "mint_orange_tart",
+    "name": "薄荷橘子塔",
+    "category": "food",
+    "image": "assets/cafe/menu/items/18-mint_orange_tart.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "cheese_toast",
+    "name": "芝士吐司",
+    "category": "food",
+    "image": "assets/cafe/menu/items/19-cheese_toast.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "bacon_toast",
+    "name": "培根吐司",
+    "category": "food",
+    "image": "assets/cafe/menu/items/20-bacon_toast.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "tomato_stew_bowl",
+    "name": "番茄炖碗",
+    "category": "food",
+    "image": "assets/cafe/menu/items/21-tomato_stew_bowl.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "honey_waffle",
+    "name": "蜂蜜华夫",
+    "category": "food",
+    "image": "assets/cafe/menu/items/22-honey_waffle.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "cocoa_cookie",
+    "name": "可可曲奇",
+    "category": "food",
+    "image": "assets/cafe/menu/items/23-cocoa_cookie.png",
+    "size": [
+      96,
+      96
+    ]
+  },
+  {
+    "id": "cream_roll_cake",
+    "name": "奶油卷蛋糕",
+    "category": "food",
+    "image": "assets/cafe/menu/items/24-cream_roll_cake.png",
+    "size": [
+      96,
+      96
+    ]
+  }
+]
