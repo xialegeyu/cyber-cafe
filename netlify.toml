@@ -1,5 +1,5 @@
 [build]
-  publish = "."
+  publish = "dist/web"
   command = ""
 
 [[headers]]

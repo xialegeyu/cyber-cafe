@@ -8,17 +8,41 @@ const WHITE_NOISE_PATH := "res://assets/audio/white_noise.wav"
 const RAIN_PATH := "res://assets/audio/rain.wav"
 
 const CATS := {
+	"calico": {
+		"label": "Calico cat",
+		"texture": "res://assets/cafe/calico-cat-laptop-top-left-cutout-clean-v2.png",
+		"hframes": 1,
+		"vframes": 1,
+		"frame": 0,
+		"scale": Vector2(0.24, 0.24),
+		"position": Vector2(72, 18),
+	},
+	"ragdoll": {
+		"label": "Ragdoll cat",
+		"texture": "res://assets/cafe/ragdoll-cat-laptop-cutout-v2.png",
+		"hframes": 1,
+		"vframes": 1,
+		"frame": 0,
+		"scale": Vector2(0.10, 0.10),
+		"position": Vector2(76, 16),
+	},
+	"tabby": {
+		"label": "Tabby cat",
+		"texture": "res://assets/cafe/tabby-cat-laptop-cutout-v2.png",
+		"hframes": 1,
+		"vframes": 1,
+		"frame": 0,
+		"scale": Vector2(0.10, 0.10),
+		"position": Vector2(76, 16),
+	},
 	"orange": {
 		"label": "Orange cat",
-		"texture": "res://assets/Neko Cafe Asset Pack/Characters/cat-orange-front.png",
-	},
-	"black": {
-		"label": "Black cat",
-		"texture": "res://assets/Neko Cafe Asset Pack/Characters/cat-black-front.png",
-	},
-	"waiter": {
-		"label": "Waiter cat",
-		"texture": "res://assets/Neko Cafe Asset Pack/Characters/cat-waiter-front.png",
+		"texture": "res://assets/cafe/orange-cat-laptop-cutout-v2.png",
+		"hframes": 1,
+		"vframes": 1,
+		"frame": 0,
+		"scale": Vector2(0.10, 0.10),
+		"position": Vector2(76, 16),
 	},
 }
 
@@ -48,7 +72,7 @@ const SEATS := [
 
 var active_seat_id := ""
 var hovered_seat_id := ""
-var selected_cat_id := "orange"
+var selected_cat_id := "calico"
 var seat_by_id := {}
 var seat_nodes := {}
 
@@ -123,11 +147,6 @@ func _create_seats() -> void:
 		var cat := Sprite2D.new()
 		cat.name = "Cat"
 		cat.centered = false
-		cat.hframes = 4
-		cat.vframes = 2
-		cat.frame = 0
-		cat.scale = Vector2(4.6, 4.6)
-		cat.position = Vector2(86, 28)
 		cat.z_index = 20
 		cat.visible = false
 		seat_root.add_child(cat)
@@ -191,12 +210,21 @@ func _sit_at(seat_id: String) -> void:
 		var cat: Sprite2D = seat_nodes[id]["cat"]
 		cat.visible = id == seat_id
 		if id == seat_id:
-			cat.texture = load(CATS[selected_cat_id]["texture"])
+			_apply_cat_style(cat)
 
 	_update_name_tag()
 	_show_seat_label(seat_id)
 	_update_room_status()
 	_update_debug_label()
+
+func _apply_cat_style(cat: Sprite2D) -> void:
+	var cat_config = CATS[selected_cat_id]
+	cat.texture = load(cat_config["texture"])
+	cat.hframes = cat_config["hframes"]
+	cat.vframes = cat_config["vframes"]
+	cat.frame = cat_config["frame"]
+	cat.scale = cat_config["scale"]
+	cat.position = cat_config["position"]
 
 func _show_seat_label(seat_id: String) -> void:
 	var seat = seat_by_id[seat_id]
