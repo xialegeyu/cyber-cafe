@@ -55,8 +55,8 @@ function prune(state: RoomState, now: number) {
 }
 
 function redisConfig() {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 
   if (!url || !token) {
     return null;
@@ -69,7 +69,7 @@ async function redis(command: unknown[]) {
   const config = redisConfig();
 
   if (!config) {
-    throw new Error("Missing Upstash Redis environment variables");
+    throw new Error("Missing Redis environment variables");
   }
 
   const redisResponse = await fetch(config.url, {
